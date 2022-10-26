@@ -24,6 +24,7 @@ import { JsiSkPathFactory } from "./JsiSkPathFactory";
 import { JsiSkMatrix } from "./JsiSkMatrix";
 import { JsiSkColorFilterFactory } from "./JsiSkColorFilterFactory";
 import { JsiSkTypefaceFactory } from "./JsiSkTypefaceFactory";
+import { JsiSkTypefaceFontProviderFactory } from "./JsiSkTypefaceFontProviderFactory";
 import { JsiSkMaskFilterFactory } from "./JsiSkMaskFilterFactory";
 import { JsiSkRuntimeEffectFactory } from "./JsiSkRuntimeEffectFactory";
 import { JsiSkImageFilterFactory } from "./JsiSkImageFilterFactory";
@@ -91,6 +92,7 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
       )
     ),
   Typeface: new JsiSkTypefaceFactory(CanvasKit),
+  TypefaceFontProvider: new JsiSkTypefaceFontProviderFactory(CanvasKit),
   MaskFilter: new JsiSkMaskFilterFactory(CanvasKit),
   RuntimeEffect: new JsiSkRuntimeEffectFactory(CanvasKit),
   ImageFilter: new JsiSkImageFilterFactory(CanvasKit),

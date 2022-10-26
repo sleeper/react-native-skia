@@ -1,6 +1,7 @@
 import type { JsiSkCanvas } from "../web/JsiSkCanvas";
 import { resolveFile } from "../../renderer/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
+import type { JsiSkTypefaceFontProvider } from "../web/JsiSkTypefaceFontProvider";
 
 import { setupSkia } from "./setup";
 
@@ -9,9 +10,9 @@ const noto = resolveFile("skia/__tests__/assets/NotoColorEmoji.ttf");
 
 describe("Paragraph", () => {
   it("should display the paragraph layout properly using the typeface provider", async () => {
-    const { surface, canvas: rnCanvas, width } = setupSkia();
+    const { surface, canvas: rnCanvas, width, Skia } = setupSkia();
     const canvas = rnCanvas as JsiSkCanvas;
-    const fontSrc = CanvasKit.TypefaceFontProvider.Make();
+    const fontSrc = Skia.TypefaceFontProvider.Make();
     fontSrc.registerFont(roboto, "Roboto");
     fontSrc.registerFont(noto, "Noto Color Emoji");
     const paraStyle = new CanvasKit.ParagraphStyle({
@@ -28,7 +29,7 @@ describe("Paragraph", () => {
       "The quick brown fox 🦊 ate a zesty hamburgerfons 🍔.\nThe 👩‍👩‍👧‍👧 laughed.";
     const builder = CanvasKit.ParagraphBuilder.MakeFromFontProvider(
       paraStyle,
-      fontSrc
+      (fontSrc as JsiSkTypefaceFontProvider).ref
     );
     builder.addText(str);
     const paragraph = builder.build();
