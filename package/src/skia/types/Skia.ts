@@ -4,6 +4,7 @@ import type { ColorFilterFactory } from "./ColorFilter";
 import type { SkFont } from "./Font";
 import type { SkTypeface, TypefaceFactory } from "./Typeface";
 import type { TypefaceFontProviderFactory } from "./TypefaceFontProvider";
+import type { ParagraphBuilderFactory } from "./Paragraph";
 import type { ImageFactory } from "./Image";
 import type { MaskFilterFactory } from "./MaskFilter";
 import type { SkPaint } from "./Paint";
@@ -58,6 +59,7 @@ export interface Skia {
   ImageFilter: ImageFilterFactory;
   Shader: ShaderFactory;
   PathEffect: PathEffectFactory;
+  ParagraphBuilder: ParagraphBuilderFactory;
   /**
    * Returns an Vertices based on the given positions and optional parameters.
    * See SkVertices.h (especially the Builder) for more details.

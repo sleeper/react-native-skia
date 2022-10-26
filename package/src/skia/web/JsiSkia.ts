@@ -38,6 +38,7 @@ import { JsiSkFont } from "./JsiSkFont";
 import { MakeVertices } from "./JsiSkVerticesFactory";
 import { JsiSkPath } from "./JsiSkPath";
 import { JsiSkTypeface } from "./JsiSkTypeface";
+import { JsiSkParagraphBuilderFactory } from "./JsiSkParagraphBuilderFactory";
 
 export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   Point: (x: number, y: number) =>
@@ -93,6 +94,7 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
     ),
   Typeface: new JsiSkTypefaceFactory(CanvasKit),
   TypefaceFontProvider: new JsiSkTypefaceFontProviderFactory(CanvasKit),
+  ParagraphBuilder: new JsiSkParagraphBuilderFactory(CanvasKit),
   MaskFilter: new JsiSkMaskFilterFactory(CanvasKit),
   RuntimeEffect: new JsiSkRuntimeEffectFactory(CanvasKit),
   ImageFilter: new JsiSkImageFilterFactory(CanvasKit),

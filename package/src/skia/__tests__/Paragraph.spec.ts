@@ -1,7 +1,7 @@
-import type { JsiSkCanvas } from "../web/JsiSkCanvas";
 import { resolveFile } from "../../renderer/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
-import type { JsiSkTypefaceFontProvider } from "../web/JsiSkTypefaceFontProvider";
+import type { ParagraphStyle } from "../types/Paragraph";
+import { TextAlign } from "../types/Paragraph";
 
 import { setupSkia } from "./setup";
 
@@ -10,32 +10,31 @@ const noto = resolveFile("skia/__tests__/assets/NotoColorEmoji.ttf");
 
 describe("Paragraph", () => {
   it("should display the paragraph layout properly using the typeface provider", async () => {
-    const { surface, canvas: rnCanvas, width, Skia } = setupSkia();
-    const canvas = rnCanvas as JsiSkCanvas;
+    const { surface, canvas, width, Skia } = setupSkia();
     const fontSrc = Skia.TypefaceFontProvider.Make();
     fontSrc.registerFont(roboto, "Roboto");
     fontSrc.registerFont(noto, "Noto Color Emoji");
-    const paraStyle = new CanvasKit.ParagraphStyle({
+    const paraStyle: ParagraphStyle = {
       textStyle: {
-        color: CanvasKit.BLACK,
+        color: Skia.Color("black"),
         fontFamilies: ["Roboto", "Noto Color Emoji"],
         fontSize: 35,
       },
-      textAlign: CanvasKit.TextAlign.Left,
+      textAlign: TextAlign.Left,
       maxLines: 4,
       ellipsis: "...",
-    });
+    };
     const str =
       "The quick brown fox 🦊 ate a zesty hamburgerfons 🍔.\nThe 👩‍👩‍👧‍👧 laughed.";
-    const builder = CanvasKit.ParagraphBuilder.MakeFromFontProvider(
+    const builder = Skia.ParagraphBuilder.MakeFromFontProvider(
       paraStyle,
-      (fontSrc as JsiSkTypefaceFontProvider).ref
+      fontSrc
     );
     builder.addText(str);
     const paragraph = builder.build();
     paragraph.layout(width);
     expect(paragraph.getHeight()).not.toBe(0);
-    canvas.ref.drawParagraph(paragraph, 0, 0);
+    canvas.drawParagraph(paragraph, 0, 0);
     processResult(surface, "snapshots/drawings/paragraph.png");
   });
 });
