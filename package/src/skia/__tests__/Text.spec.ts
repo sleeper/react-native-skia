@@ -85,10 +85,6 @@ describe("Text", () => {
     paragraph.layout(width);
     expect(paragraph.getHeight()).not.toBe(0);
     canvas.drawParagraph(paragraph, 0, 0);
-    processResult(
-      surface,
-      "snapshots/drawings/paragraph-with-colors.png",
-      true
-    );
+    processResult(surface, "snapshots/drawings/paragraph-with-colors.png");
   });
 });
