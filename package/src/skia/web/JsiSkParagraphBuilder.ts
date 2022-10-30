@@ -16,12 +16,12 @@ import { ckEnum, HostObject, optEnum } from "./Host";
 import { JsiSkPaint } from "./JsiSkPaint";
 import { JsiSkParagraph } from "./JsiSkParagraph";
 
-export const textStyle = (style: TextStyle): CKTextStyle => {
+export const textStyle = (style: TextStyle) => {
   const styleCopy = { ...style } as CKTextStyle;
-  if (style.textBaseline) {
+  if (style.textBaseline !== undefined) {
     styleCopy.textBaseline = ckEnum(style.textBaseline);
   }
-  if (style.decorationStyle) {
+  if (style.decorationStyle !== undefined) {
     styleCopy.decorationStyle = ckEnum(style.decorationStyle);
   }
   return styleCopy;
@@ -65,7 +65,7 @@ export class JsiSkParagraphBuilder
   }
 
   pushStyle(text: TextStyle) {
-    this.ref.pushStyle(textStyle(text));
+    this.ref.pushStyle(new this.CanvasKit.TextStyle(textStyle(text)));
   }
 
   pushPaintStyle(ts: TextStyle, fg: SkPaint, bg: SkPaint) {

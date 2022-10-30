@@ -1,9 +1,8 @@
 import { resolveFile } from "../../renderer/__tests__/setup";
+import type { ParagraphStyle } from "../../skia/types";
+import { TextAlign } from "../../skia/types";
+import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
-import type { ParagraphStyle } from "../types/Paragraph";
-import { TextAlign } from "../types/Paragraph";
-
-import { setupSkia } from "./setup";
 
 const roboto = resolveFile("skia/__tests__/assets/Roboto-Regular.ttf");
 const noto = resolveFile("skia/__tests__/assets/NotoColorEmoji.ttf");
@@ -11,6 +10,7 @@ const noto = resolveFile("skia/__tests__/assets/NotoColorEmoji.ttf");
 describe("Paragraph", () => {
   it("should display the paragraph layout properly using the typeface provider", async () => {
     const { surface, canvas, width, Skia } = setupSkia();
+    //const Sk = getSkDOM();
     const fontSrc = Skia.TypefaceFontProvider.Make();
     fontSrc.registerFont(roboto, "Roboto");
     fontSrc.registerFont(noto, "Noto Color Emoji");
