@@ -16,7 +16,7 @@ import { ckEnum, HostObject, optEnum } from "./Host";
 import { JsiSkPaint } from "./JsiSkPaint";
 import { JsiSkParagraph } from "./JsiSkParagraph";
 
-export const textStyle = (style: TextStyle) => {
+export const textStyle = (CanvasKit: CanvasKit, style: TextStyle) => {
   const styleCopy = { ...style } as CKTextStyle;
   if (style.textBaseline !== undefined) {
     styleCopy.textBaseline = ckEnum(style.textBaseline);
@@ -24,7 +24,7 @@ export const textStyle = (style: TextStyle) => {
   if (style.decorationStyle !== undefined) {
     styleCopy.decorationStyle = ckEnum(style.decorationStyle);
   }
-  return styleCopy;
+  return new CanvasKit.TextStyle(styleCopy);
 };
 
 export class JsiSkParagraphBuilder
@@ -64,13 +64,13 @@ export class JsiSkParagraphBuilder
     this.ref.pop();
   }
 
-  pushStyle(text: TextStyle) {
-    this.ref.pushStyle(new this.CanvasKit.TextStyle(textStyle(text)));
+  pushStyle(ts: TextStyle) {
+    this.ref.pushStyle(textStyle(this.CanvasKit, ts));
   }
 
   pushPaintStyle(ts: TextStyle, fg: SkPaint, bg: SkPaint) {
     this.ref.pushPaintStyle(
-      textStyle(ts),
+      textStyle(this.CanvasKit, ts),
       JsiSkPaint.fromValue(fg),
       JsiSkPaint.fromValue(bg)
     );

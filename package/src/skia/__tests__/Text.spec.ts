@@ -58,14 +58,24 @@ describe("Text", () => {
       fontSrc
     );
     builder.addText(str);
-    builder.pushStyle({
-      color: Skia.Color("blue"),
-      fontSize: 16,
-    });
+    const bg = Skia.Paint();
+    bg.setColor(Skia.Color("black"));
+    const fg = Skia.Paint();
+    fg.setColor(Skia.Color("white"));
+    builder.pushPaintStyle(
+      {
+        fontSize: 16,
+        fontFamilies: ["Roboto", "Noto Color Emoji"],
+        color: Skia.Color("blue"),
+      },
+      fg,
+      bg
+    );
     builder.addText(" ate a zesty hamburgerfons 🍔.");
     builder.pop();
     builder.pushStyle({
       color: Skia.Color("pink"),
+      fontFamilies: ["Roboto", "Noto Color Emoji"],
       fontSize: 16,
     });
     builder.addText("\nThe 👩‍👩‍👧‍👧");
@@ -75,6 +85,10 @@ describe("Text", () => {
     paragraph.layout(width);
     expect(paragraph.getHeight()).not.toBe(0);
     canvas.drawParagraph(paragraph, 0, 0);
-    processResult(surface, "snapshots/drawings/paragraph-with-colors.png");
+    processResult(
+      surface,
+      "snapshots/drawings/paragraph-with-colors.png",
+      true
+    );
   });
 });

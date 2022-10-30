@@ -13,7 +13,7 @@ import { ckEnum, Host } from "./Host";
 import { JsiSkTypefaceFontProvider } from "./JsiSkTypefaceFontProvider";
 import { JsiSkParagraphBuilder, textStyle } from "./JsiSkParagraphBuilder";
 
-const paragraphStyle = (style: ParagraphStyle) => {
+const paragraphStyle = (CanvasKit: CanvasKit, style: ParagraphStyle) => {
   const styleCopy = { ...style } as CKParagraphStyle;
   if (style.textAlign) {
     styleCopy.textAlign = ckEnum(style.textAlign);
@@ -25,9 +25,9 @@ const paragraphStyle = (style: ParagraphStyle) => {
     styleCopy.textHeightBehavior = ckEnum(style.textHeightBehavior);
   }
   if (style.textStyle) {
-    styleCopy.textStyle = textStyle(style.textStyle);
+    styleCopy.textStyle = textStyle(CanvasKit, style.textStyle);
   }
-  return styleCopy;
+  return new CanvasKit.ParagraphStyle(styleCopy);
 };
 
 export class JsiSkParagraphBuilderFactory
@@ -39,7 +39,7 @@ export class JsiSkParagraphBuilderFactory
   }
 
   MakeFromFontProvider(style: ParagraphStyle, fontSrc: SkTypefaceFontProvider) {
-    const ps = new this.CanvasKit.ParagraphStyle(paragraphStyle(style));
+    const ps = paragraphStyle(this.CanvasKit, style);
     const paragraphBuilder =
       this.CanvasKit.ParagraphBuilder.MakeFromFontProvider(
         ps,
