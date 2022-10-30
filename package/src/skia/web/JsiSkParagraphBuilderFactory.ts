@@ -45,6 +45,10 @@ export class JsiSkParagraphBuilderFactory
         ps,
         JsiSkTypefaceFontProvider.fromValue(fontSrc)
       );
-    return new JsiSkParagraphBuilder(this.CanvasKit, paragraphBuilder);
+    return new JsiSkParagraphBuilder(
+      this.CanvasKit,
+      paragraphBuilder,
+      style.textStyle ?? {}
+    );
   }
 }

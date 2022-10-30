@@ -31,8 +31,11 @@ export class JsiSkParagraphBuilder
   extends HostObject<ParagraphBuilder, "ParagraphBuilder">
   implements SkParagraphBuilder
 {
-  constructor(CanvasKit: CanvasKit, ref: ParagraphBuilder) {
+  private textStyles: TextStyle[];
+
+  constructor(CanvasKit: CanvasKit, ref: ParagraphBuilder, ts: TextStyle) {
     super(CanvasKit, ref, "ParagraphBuilder");
+    this.textStyles = [ts];
   }
 
   addPlaceholder(
@@ -62,15 +65,22 @@ export class JsiSkParagraphBuilder
 
   pop() {
     this.ref.pop();
+    this.textStyles.pop();
   }
 
   pushStyle(ts: TextStyle) {
-    this.ref.pushStyle(textStyle(this.CanvasKit, ts));
+    const currentStyle = this.textStyles[this.textStyles.length - 1];
+    const style = { ...currentStyle, ...ts };
+    this.textStyles.push(style);
+    this.ref.pushStyle(textStyle(this.CanvasKit, style));
   }
 
   pushPaintStyle(ts: TextStyle, fg: SkPaint, bg: SkPaint) {
+    const currentStyle = this.textStyles[this.textStyles.length - 1];
+    const style = { ...currentStyle, ...ts };
+    this.textStyles.push(style);
     this.ref.pushPaintStyle(
-      textStyle(this.CanvasKit, ts),
+      textStyle(this.CanvasKit, style),
       JsiSkPaint.fromValue(fg),
       JsiSkPaint.fromValue(bg)
     );

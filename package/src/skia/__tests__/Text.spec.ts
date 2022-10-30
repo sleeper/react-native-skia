@@ -65,8 +65,6 @@ describe("Text", () => {
     builder.pushPaintStyle(
       {
         fontSize: 16,
-        fontFamilies: ["Roboto", "Noto Color Emoji"],
-        color: Skia.Color("blue"),
       },
       fg,
       bg
@@ -75,8 +73,6 @@ describe("Text", () => {
     builder.pop();
     builder.pushStyle({
       color: Skia.Color("pink"),
-      fontFamilies: ["Roboto", "Noto Color Emoji"],
-      fontSize: 16,
     });
     builder.addText("\nThe 👩‍👩‍👧‍👧");
     builder.pop();
