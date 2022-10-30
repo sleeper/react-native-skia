@@ -10,7 +10,7 @@ export * from "./LineNode";
 export * from "./PatchNode";
 export * from "./VerticesNode";
 export * from "./CustomDrawingNode";
-export * from "./Text";
+export * from "./SimpleText";
 export * from "./PictureNode";
 export * from "./DiffRectNode";
 export * from "./ImageSVG";
