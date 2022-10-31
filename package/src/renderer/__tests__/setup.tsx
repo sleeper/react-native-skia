@@ -145,6 +145,7 @@ export const mountCanvas = (element: ReactNode) => {
     ref,
     center: Skia.Point(width / 2, height / 2),
     Skia,
+    typefaceProvider: Skia.TypefaceFontProvider.Make(),
   };
   return {
     draw: () => {

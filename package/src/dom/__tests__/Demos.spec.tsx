@@ -9,7 +9,7 @@ import { processResult } from "../../__tests__/setup";
 
 describe("Drawings", () => {
   it("Apple Breathe Demo", () => {
-    const { surface, canvas } = setupSkia(width, height);
+    const { surface, ctx } = setupSkia(width, height);
     const { Skia, vec, polar2Canvas } = importSkia();
     const Sk = getSkDOM();
     const c = vec(width / 2, height / 2);
@@ -42,13 +42,12 @@ describe("Drawings", () => {
       rings.addChild(ring);
     }
     root.addChild(rings);
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, "snapshots/demos/breathe.png");
   });
 
   it("Apple Breathe Demo with the new API", () => {
-    const { surface, canvas } = setupSkia(width, height);
+    const { surface, ctx } = setupSkia(width, height);
     const { Skia, vec, polar2Canvas } = importSkia();
     const Sk = getSkDOM();
     const c = vec(width / 2, height / 2);
@@ -76,13 +75,12 @@ describe("Drawings", () => {
       rings.addChild(Sk.Circle({ c, r: R, matrix, color: i % 2 ? c1 : c2 }));
     }
     root.addChild(rings);
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, "snapshots/demos/breathe.png");
   });
 
   it("Apple Breathe Demo with animations", () => {
-    const { surface, canvas } = setupSkia(width, height);
+    const { surface, ctx } = setupSkia(width, height);
     const { Skia, vec, polar2Canvas } = importSkia();
     const Sk = getSkDOM();
     const c = vec(width / 2, height / 2);
@@ -110,11 +108,10 @@ describe("Drawings", () => {
       rings.addChild(Sk.Circle({ c, r: R, matrix, color: i % 2 ? c1 : c2 }));
     }
     root.addChild(rings);
-    let ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, "snapshots/demos/breathe.png");
 
-    ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
+    const ctx2 = { ...ctx, paint: Skia.Paint(), opacity: 1 };
     blur.setProp("blur", 0);
     root.setProp("transform", [
       { translateX: c.x },
@@ -142,7 +139,7 @@ describe("Drawings", () => {
         { translateY: -c.y },
       ]);
     }
-    root.render(ctx);
+    root.render(ctx2);
     processResult(surface, "snapshots/demos/breathe2.png");
   });
 });

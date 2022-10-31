@@ -1,4 +1,4 @@
-import type { Node } from "../../dom/types";
+import type { DrawingContext, Node } from "../../dom/types";
 import { mapKeys } from "../../renderer/typeddash";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
 import { isMatrix, Skia } from "../types";
@@ -17,6 +17,12 @@ export const setupSkia = (width = 256, height = 256) => {
   expect(surface).toBeDefined();
   const canvas = surface.getCanvas();
   expect(canvas).toBeDefined();
+  const ctx: DrawingContext = {
+    canvas,
+    paint: Skia.Paint(),
+    opacity: 1,
+    typefaceProvider: Skia.TypefaceFontProvider.Make(),
+  };
   return {
     surface,
     width,
@@ -25,6 +31,7 @@ export const setupSkia = (width = 256, height = 256) => {
     canvas,
     Skia,
     CanvasKit: global.CanvasKit,
+    ctx,
   };
 };
 

@@ -16,8 +16,8 @@ export enum TextBaseline {
 }
 
 export enum TextDirection {
-  LTR,
   RTL,
+  LTR,
 }
 
 export enum TextHeightBehavior {

@@ -26,3 +26,5 @@ export * from "./JsiInstance";
 export * from "./Skia";
 export * from "./TextBlob";
 export * from "./Paragraph";
+export * from "./Typeface";
+export * from "./TypefaceFontProvider";

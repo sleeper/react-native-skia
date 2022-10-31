@@ -10,7 +10,7 @@ import { fitRects, rect2rect } from "../nodes/datatypes";
 
 describe("Drawings", () => {
   it("Hello World", () => {
-    const { surface, canvas } = setupSkia(width, height);
+    const { surface, ctx } = setupSkia(width, height);
     const { Skia, vec } = importSkia();
     const Sk = getSkDOM();
 
@@ -32,13 +32,12 @@ describe("Drawings", () => {
     c3.addChild(Sk.Circle({ c: vec(width / 2, height - r), r }));
     root.addChild(c3);
 
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, "snapshots/drawings/blend-mode-multiply.png");
   });
 
   it("Should draw a path", () => {
-    const { surface, canvas } = setupSkia(width, height);
+    const { surface, ctx } = setupSkia(width, height);
     const { Skia, processTransform2d } = importSkia();
     const Sk = getSkDOM();
     const size = width;
@@ -87,7 +86,6 @@ describe("Drawings", () => {
     );
     const pathNode = Sk.Path({ path, start: 0, end: 1 });
     root.addChild(pathNode);
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1 };
     root.render(ctx);
     processResult(surface, "snapshots/paths/skia.png");
   });

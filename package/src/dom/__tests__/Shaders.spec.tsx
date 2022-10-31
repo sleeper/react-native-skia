@@ -11,7 +11,7 @@ import { fitRects, rect2rect } from "../nodes/datatypes";
 
 describe("Drawings", () => {
   it("Should display a simple shader", () => {
-    const { surface, canvas } = setupSkia(width, height);
+    const { surface, ctx } = setupSkia(width, height);
     const { Skia } = importSkia();
     const Sk = getSkDOM();
     const source = Skia.RuntimeEffect.Make(`
@@ -27,13 +27,12 @@ describe("Drawings", () => {
     });
     root.addChild(filter);
     root.addChild(Sk.Fill());
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, "snapshots/drawings/cyan.png");
   });
 
   it("Should display a nested shader", () => {
-    const { surface, canvas } = setupSkia(width, height);
+    const { surface, ctx } = setupSkia(width, height);
     const { Skia } = importSkia();
     const Sk = getSkDOM();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
@@ -69,13 +68,12 @@ half4 main(float2 xy) {
     const root = Sk.Group();
     root.addChild(filter);
     root.addChild(Sk.Fill());
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, "snapshots/drawings/nested-shader.png");
   });
 
   it("Should have always the correct state", () => {
-    const { surface, canvas } = setupSkia(width, height);
+    const { surface, ctx } = setupSkia(width, height);
     const { Skia, processTransform2d } = importSkia();
     const Sk = getSkDOM();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
@@ -111,12 +109,11 @@ half4 main(float2 xy) {
     const root = Sk.Group();
     root.addChild(filter);
     root.addChild(Sk.Fill());
-    let ctx = { canvas, paint: Skia.Paint(), opacity: 1 };
     root.render(ctx);
     processResult(surface, "snapshots/drawings/nested-shader.png");
     filter.setProp("uniforms", { r: 25 });
-    ctx = { canvas, paint: Skia.Paint(), opacity: 1 };
-    root.render(ctx);
+    const ctx2 = { ...ctx, paint: Skia.Paint(), opacity: 1 };
+    root.render(ctx2);
     processResult(surface, "snapshots/drawings/nested-shader2.png", true);
   });
 });

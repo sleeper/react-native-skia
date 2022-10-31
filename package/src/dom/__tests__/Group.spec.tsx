@@ -16,7 +16,7 @@ const r = 24;
 
 describe("Group", () => {
   it("should clip rect", () => {
-    const { surface, canvas } = setupSkia(width, height);
+    const { surface, ctx } = setupSkia(width, height);
     const { Skia, rect } = importSkia();
     const Sk = getSkDOM();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
@@ -36,13 +36,12 @@ describe("Group", () => {
       Sk.Image({ image, fit: "cover", x: 0, y: 0, width: size, height: size })
     );
     root.addChild(clipNode);
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, docPath("group/clip-rect.png"));
   });
   it("should clip rounded rect", () => {
-    const { surface, canvas } = setupSkia(width, height);
-    const { Skia, rect, rrect } = importSkia();
+    const { surface, ctx } = setupSkia(width, height);
+    const { rect, rrect } = importSkia();
     const Sk = getSkDOM();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
     const clipRRect = rrect(
@@ -54,12 +53,11 @@ describe("Group", () => {
     root.addChild(
       Sk.Image({ image, fit: "cover", x: 0, y: 0, width: size, height: size })
     );
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, docPath("group/clip-rrect.png"));
   });
   it("Should use a path as a clip", () => {
-    const { surface, canvas } = setupSkia(width, height);
+    const { surface, ctx } = setupSkia(width, height);
     const { Skia, processTransform2d } = importSkia();
     const Sk = getSkDOM();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
@@ -75,12 +73,11 @@ describe("Group", () => {
       Sk.Image({ image, fit: "cover", x: 0, y: 0, width: size, height: size })
     );
 
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, docPath("group/clip-path.png"));
   });
   it("Should invert a clip", () => {
-    const { surface, canvas } = setupSkia(width, height);
+    const { surface, ctx } = setupSkia(width, height);
     const { Skia, processTransform2d } = importSkia();
     const Sk = getSkDOM();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
@@ -94,12 +91,11 @@ describe("Group", () => {
     root.addChild(
       Sk.Image({ image, fit: "cover", x: 0, y: 0, width: size, height: size })
     );
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, docPath("group/invert-clip.png"));
   });
   it("Drawing elements inherits group properties", () => {
-    const { surface, canvas } = setupSkia(width, height);
+    const { surface, ctx } = setupSkia(width, height);
     const { Skia, rect } = importSkia();
     const Sk = getSkDOM();
 
@@ -124,7 +120,6 @@ describe("Group", () => {
         end: 1,
       })
     );
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, docPath("group/scale-path.png"));
   });

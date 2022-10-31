@@ -15,7 +15,7 @@ describe("Drawings", () => {
     // an static error will be thrown here.
     const foo: JSX.IntrinsicElements[`${NodeType}`] = {};
     expect(foo).toBeDefined();
-    const { surface, canvas } = setupSkia(width, height);
+    const { surface, ctx } = setupSkia(width, height);
     const { Skia, vec } = importSkia();
     const Sk = getSkDOM();
     const c = vec(width / 2, height / 2);
@@ -27,7 +27,6 @@ describe("Drawings", () => {
 
     const circle = Sk.Circle({ c, r: R, color: c1 });
     root.addChild(circle);
-    let ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, "snapshots/render-nodes/simple.png");
 
@@ -36,8 +35,8 @@ describe("Drawings", () => {
     circle.setProp("cx" as keyof CircleProps, 0);
     circle.setProp("cy" as keyof CircleProps, 0);
     circle.setProp("color", c2);
-    ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
-    root.render(ctx);
+    const ctx2 = { ...ctx, paint: Skia.Paint(), opacity: 1, Skia };
+    root.render(ctx2);
     processResult(surface, "snapshots/render-nodes/simple2.png");
   });
 });

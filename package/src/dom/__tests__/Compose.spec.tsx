@@ -11,8 +11,8 @@ import { docPath, processResult } from "../../__tests__/setup";
 describe("Compose", () => {
   it("should compose image filters", () => {
     const size = width;
-    const { surface, canvas } = setupSkia(width, height);
-    const { Skia, rect, vec } = importSkia();
+    const { surface, ctx } = setupSkia(width, height);
+    const { rect, vec } = importSkia();
     const Sk = getSkDOM();
     const image = loadImage("skia/__tests__/assets/oslo.jpg");
 
@@ -34,7 +34,6 @@ describe("Compose", () => {
     blur.addChild(cf);
     root.addChild(blur);
 
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, docPath("image-filters/composing.png"));
   });

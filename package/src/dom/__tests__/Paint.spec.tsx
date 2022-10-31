@@ -11,7 +11,7 @@ import { docPath, processResult } from "../../__tests__/setup";
 describe("Paint", () => {
   it("should assign a paint directly", () => {
     const size = width;
-    const { surface, canvas } = setupSkia(width, height);
+    const { surface, ctx } = setupSkia(width, height);
     const { Skia, vec } = importSkia();
     const Sk = getSkDOM();
 
@@ -24,12 +24,11 @@ describe("Paint", () => {
     const circle = Sk.Circle({ c: vec(r, r), r, paint });
     root.addChild(circle);
 
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, docPath("paint/assignement.png"));
   });
   it("should draw the color fill and strokes properly", () => {
-    const { surface, canvas } = setupSkia(width, height);
+    const { surface, ctx } = setupSkia(width, height);
     const { vec, Skia } = importSkia();
     const Sk = getSkDOM();
 
@@ -57,13 +56,12 @@ describe("Paint", () => {
       })
     );
     root.addChild(circle);
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, docPath("paint/stroke.png"));
   });
 
   it("should use the opacity property properly", () => {
-    const { surface, canvas } = setupSkia(width, height);
+    const { surface, ctx } = setupSkia(width, height);
     const { vec, Skia } = importSkia();
     const Sk = getSkDOM();
 
@@ -92,7 +90,6 @@ describe("Paint", () => {
     c3.addChild(Sk.Circle({ c, r }));
     root.addChild(c3);
 
-    const ctx = { canvas, paint: Skia.Paint(), opacity: 1, Skia };
     root.render(ctx);
     processResult(surface, docPath("paint/opacity.png"));
   });

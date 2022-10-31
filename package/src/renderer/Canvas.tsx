@@ -90,6 +90,10 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
     }, [children, root, redraw, container, canvasCtx]);
 
     const paint = useMemo(() => Skia.Paint(), []);
+    const typefaceProvider = useMemo(
+      () => Skia.TypefaceFontProvider.Make(),
+      []
+    );
 
     // Draw callback
     const onDraw = useDrawCallback(
@@ -116,6 +120,7 @@ export const Canvas = forwardRef<SkiaView, CanvasProps>(
           ref,
           center: { x: width / 2, y: height / 2 },
           Skia,
+          typefaceProvider,
         };
         container.draw(ctx);
       },
