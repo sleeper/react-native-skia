@@ -24,6 +24,8 @@ export const wait = (ms: number) =>
 export const resolveFile = (uri: string) =>
   fs.readFileSync(path.resolve(__dirname, `../../${uri}`));
 
+const roboto = resolveFile("skia/__tests__/assets/Roboto-Regular.ttf");
+
 (global as any).fetch = jest.fn((uri: string) =>
   Promise.resolve({
     arrayBuffer: () => Promise.resolve(resolveFile(uri)),
@@ -135,6 +137,8 @@ export const mountCanvas = (element: ReactNode) => {
       container.depMgr.update();
     }
   );
+  const typefaceProvider = Skia.TypefaceFontProvider.Make();
+  typefaceProvider.registerFont(roboto, "Roboto");
   const ctx: DrawingContext = {
     width,
     height,
@@ -145,7 +149,7 @@ export const mountCanvas = (element: ReactNode) => {
     ref,
     center: Skia.Point(width / 2, height / 2),
     Skia,
-    typefaceProvider: Skia.TypefaceFontProvider.Make(),
+    typefaceProvider,
   };
   return {
     draw: () => {
