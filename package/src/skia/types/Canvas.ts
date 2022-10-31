@@ -338,7 +338,7 @@ export interface SkCanvas {
    * @param x
    * @param y
    */
-  drawParagraph(paragraph: SkParagraph, x: 0, y: 0): void;
+  drawParagraph(paragraph: SkParagraph, x: number, y: number): void;
 
   /**
    * Draws the given TextBlob at (x, y) using the current clip, current matrix, and the

@@ -6,6 +6,7 @@ import type {
   SkShader,
   SkPathEffect,
   SkPaint,
+  SkSpan,
 } from "../../skia/types";
 import type { Node, DeclarationNode, NodeType } from "../types";
 import { DeclarationType } from "../types";
@@ -154,5 +155,9 @@ export abstract class JsiDeclarationNode<
 
   isPathEffect(): this is DeclarationNode<unknown, SkPathEffect> {
     return this.declarationType === DeclarationType.PathEffect;
+  }
+
+  isSpan(): this is DeclarationNode<unknown, SkSpan> {
+    return this.declarationType === DeclarationType.Span;
   }
 }

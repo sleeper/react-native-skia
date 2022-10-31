@@ -27,6 +27,7 @@ import type {
   TextShadow,
   Color,
 } from "../../skia/types";
+import type { TextBaseline } from "../../skia/types/Paragraph/ParagraphStyle";
 
 import type {
   CircleDef,
@@ -194,7 +195,7 @@ export interface TextStyleProps {
   letterSpacing?: number;
   locale?: string;
   shadows?: TextShadow[];
-  textBaseline?: SkEnum<typeof TextHeightBehavior>;
+  textBaseline?: SkEnum<typeof TextBaseline>;
   wordSpacing?: number;
 }
 
@@ -204,6 +205,7 @@ export interface TextProps
     TextStyleProps {
   x: number;
   y: number;
+  width: number;
 }
 
 export interface SpanProps extends TextStyleProps {
