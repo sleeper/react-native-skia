@@ -15,12 +15,15 @@ describe("Text", () => {
           y={0}
           width={width}
           fontFamilies={["Roboto"]}
-          fontSize={256}
+          fontSize={128}
         >
-          Hello <Span color="blue">World</Span>
+          Hello
+          <Span color="blue" fontSize={256}>
+            World
+          </Span>
         </Text>
       </Group>
     );
-    processResult(surface, "snapshots/drawings/simple-text.png", true);
+    processResult(surface, "snapshots/drawings/simple-text.png");
   });
 });
