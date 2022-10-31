@@ -12,14 +12,14 @@ SimpleText.defaultProps = {
   y: 0,
 };
 
-export const Text = (props: SkiaProps<SimpleTextProps>) => {
-  console.log(
-    "<Text /> is now <SimpleText />. In the next release <Text /> will have a new API."
-  );
-  return <skSimpleText {...props} />;
-};
+// export const Text = (props: SkiaProps<SimpleTextProps>) => {
+//   console.log(
+//     "<Text /> is now <SimpleText />. In the next release <Text /> will have a new API."
+//   );
+//   return <skSimpleText {...props} />;
+// };
 
-Text.defaultProps = {
-  x: 0,
-  y: 0,
-};
+// Text.defaultProps = {
+//   x: 0,
+//   y: 0,
+// };

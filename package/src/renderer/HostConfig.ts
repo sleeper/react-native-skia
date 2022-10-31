@@ -1,7 +1,8 @@
 /*global NodeJS*/
 import type { HostConfig } from "react-reconciler";
 
-import type { NodeType, Node } from "../dom/types";
+import type { Node } from "../dom/types";
+import { NodeType } from "../dom/types";
 import type { SkiaValue } from "../values";
 
 import type { Container } from "./Container";
@@ -102,15 +103,11 @@ export const skHostConfig: SkiaHostConfig = {
     return false;
   },
 
-  createTextInstance(
-    _text,
-    _rootContainerInstance,
-    _hostContext,
-    _internalInstanceHandle
-  ) {
+  createTextInstance(text, container, _hostContext, _internalInstanceHandle) {
     debug("createTextInstance");
-    // return SpanNode({}, text) as SkNode;
-    throw new Error("Text nodes are not supported yet");
+    // This node cannot be animated
+    const node = createNode(container, NodeType.Span, { text });
+    return node;
   },
 
   createInstance(
@@ -199,11 +196,11 @@ export const skHostConfig: SkiaHostConfig = {
   },
 
   commitTextUpdate: (
-    _textInstance: TextInstance,
+    textInstance: TextInstance,
     _oldText: string,
-    _newText: string
+    text: string
   ) => {
-    //  textInstance.instance = newText;
+    textInstance.setProps({ text });
   },
 
   clearContainer: (container) => {
