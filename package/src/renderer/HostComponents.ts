@@ -49,6 +49,8 @@ import type {
   LerpColorFilterProps,
   BoxProps,
   BoxShadowProps,
+  TextProps,
+  SpanProps,
 } from "../dom/types";
 import type { ChildrenProps } from "../dom/types/Common";
 import type {
@@ -82,6 +84,7 @@ declare global {
       skRect: SkiaProps<RectProps>;
       skRRect: SkiaProps<RoundedRectProps>;
       skVertices: SkiaProps<VerticesProps>;
+      skText: SkiaProps<TextProps>;
       skSimpleText: SkiaProps<SimpleTextProps>;
       skTextPath: SkiaProps<TextPathProps>;
       skTextBlob: SkiaProps<TextBlobProps>;
@@ -89,6 +92,8 @@ declare global {
       skDiffRect: SkiaProps<DiffRectProps>;
       skPicture: SkiaProps<PictureProps>;
       skImageSVG: SkiaProps<ImageSVGProps>;
+
+      skSpan: SkiaProps<SpanProps>;
 
       // BlurMaskFilters
       skBlurMaskFilter: SkiaProps<BlurMaskFilterProps>;
@@ -178,6 +183,10 @@ export const createNode = (
       return Sk.RRect(props);
     case NodeType.Vertices:
       return Sk.Vertices(props);
+    case NodeType.Text:
+      return Sk.Text(props);
+    case NodeType.Span:
+      return Sk.Span(props);
     case NodeType.SimpleText:
       return Sk.SimpleText(props);
     case NodeType.TextPath:

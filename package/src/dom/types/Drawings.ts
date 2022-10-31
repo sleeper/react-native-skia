@@ -5,7 +5,6 @@ import type {
   SkImage,
   StrokeOpts,
   Vector,
-  Color,
   SkPoint,
   BlendMode,
   PointMode,
@@ -17,6 +16,16 @@ import type {
   SkSVG,
   SkPaint,
   SkRect,
+  TextHeightBehavior,
+  TextDirection,
+  TextAlign,
+  FontStyle,
+  DecorationStyle,
+  StrutStyle,
+  TextFontFeatures,
+  TextFontVariations,
+  TextShadow,
+  Color,
 } from "../../skia/types";
 
 import type {
@@ -154,4 +163,51 @@ export interface BoxShadowProps {
   blur: number;
   color?: Color;
   inner?: boolean;
+}
+
+export interface ParagraphStyleProps {
+  disableHinting?: boolean;
+  ellipsis?: string;
+  heightMultiplier?: number;
+  maxLines?: number;
+  strutStyle?: StrutStyle;
+  textAlign?: SkEnum<typeof TextAlign>;
+  textDirection?: SkEnum<typeof TextDirection>;
+  textHeightBehavior?: SkEnum<typeof TextHeightBehavior>;
+}
+
+export interface TextStyleProps {
+  backgroundColor?: Color;
+  color?: Color;
+  decoration?: number;
+  decorationColor?: Color;
+  decorationThickness?: number;
+  decorationStyle?: SkEnum<typeof DecorationStyle>;
+  fontFamilies?: string[];
+  fontFeatures?: TextFontFeatures[];
+  fontSize?: number;
+  fontStyle?: SkEnum<typeof FontStyle>;
+  fontVariations?: TextFontVariations[];
+  foregroundColor?: Color;
+  heightMultiplier?: number;
+  halfLeading?: boolean;
+  letterSpacing?: number;
+  locale?: string;
+  shadows?: TextShadow[];
+  textBaseline?: SkEnum<typeof TextHeightBehavior>;
+  wordSpacing?: number;
+}
+
+export interface TextProps
+  extends DrawingNodeProps,
+    ParagraphStyleProps,
+    TextStyleProps {
+  x: number;
+  y: number;
+}
+
+export interface SpanProps extends TextStyleProps {
+  text?: string;
+  foregroundPaint?: SkPaint;
+  backgroundPaint?: SkPaint;
 }

@@ -5,6 +5,7 @@ import type {
   SkColorFilter,
   SkPathEffect,
   SkPaint,
+  SkSpan,
 } from "../../skia/types";
 
 import type { ChildrenProps, GroupProps, PaintProps } from "./Common";
@@ -46,6 +47,8 @@ import type {
   DrawingNodeProps,
   BoxProps,
   BoxShadowProps,
+  TextProps,
+  SpanProps,
 } from "./Drawings";
 import type { BlurMaskFilterProps } from "./MaskFilters";
 import type {
@@ -95,6 +98,7 @@ export interface SkDOM {
   Rect(props: RectProps): DrawingNode<RectProps>;
   RRect(props: RoundedRectProps): DrawingNode<RoundedRectProps>;
   Vertices(props: VerticesProps): DrawingNode<VerticesProps>;
+  Text(props: TextProps): DrawingNode<TextProps>;
   SimpleText(props: SimpleTextProps): DrawingNode<SimpleTextProps>;
   TextPath(props: TextPathProps): DrawingNode<TextPathProps>;
   TextBlob(props: TextBlobProps): DrawingNode<TextBlobProps>;
@@ -102,6 +106,8 @@ export interface SkDOM {
   DiffRect(props: DiffRectProps): DrawingNode<DiffRectProps>;
   Picture(props: PictureProps): DrawingNode<PictureProps>;
   ImageSVG(props: ImageSVGProps): DrawingNode<ImageSVGProps>;
+
+  Span(props: SpanProps): DeclarationNode<SpanProps, SkSpan>;
 
   // BlurMaskFilters
   BlurMaskFilter(

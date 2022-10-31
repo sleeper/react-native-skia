@@ -39,6 +39,8 @@ import type {
   BoxProps,
   BoxShadowProps,
   ChildrenProps,
+  TextProps,
+  SpanProps,
 } from "../types";
 import type {
   BlendImageFilterProps,
@@ -122,6 +124,7 @@ import { GroupNode } from "./GroupNode";
 import { PaintNode } from "./PaintNode";
 import type { NodeContext } from "./Node";
 import { LayerNode } from "./LayerNode";
+import { SpanNode, TextNode } from "./drawings/Text";
 
 export class JsiSkDOM implements SkDOM {
   constructor(private ctx: NodeContext) {}
@@ -187,6 +190,10 @@ export class JsiSkDOM implements SkDOM {
     return new VerticesNode(this.ctx, props);
   }
 
+  Text(props: TextProps) {
+    return new TextNode(this.ctx, props);
+  }
+
   SimpleText(props: SimpleTextProps) {
     return new SimpleTextNode(this.ctx, props);
   }
@@ -213,6 +220,10 @@ export class JsiSkDOM implements SkDOM {
 
   ImageSVG(props: ImageSVGProps) {
     return new ImageSVGNode(this.ctx, props);
+  }
+
+  Span(props: SpanProps) {
+    return new SpanNode(this.ctx, props);
   }
 
   // BlurMaskFilters

@@ -62,12 +62,16 @@ export const enum NodeType {
   Patch = "skPatch",
   Vertices = "skVertices",
   DiffRect = "skDiffRect",
+  Text = "skText",
   SimpleText = "skSimpleText",
   TextPath = "skTextPath",
   TextBlob = "skTextBlob",
   Glyphs = "skGlyphs",
   Picture = "skPicture",
   ImageSVG = "skImageSVG",
+
+  // Text node
+  Span = "skSpan",
 }
 
 export const enum DeclarationType {
@@ -77,5 +81,6 @@ export const enum DeclarationType {
   ColorFilter,
   PathEffect,
   MaskFilter,
+  Span,
   Unknown,
 }
