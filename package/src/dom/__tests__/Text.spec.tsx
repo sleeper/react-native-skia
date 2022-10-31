@@ -32,4 +32,50 @@ describe("Paragraph", () => {
     root.render(ctx);
     processResult(surface, "snapshots/drawings/paragraph.png");
   });
+  it("should display the paragraph layout with different text color", async () => {
+    const { surface, width, ctx, Skia } = setupSkia();
+    const Sk = getSkDOM();
+    ctx.typefaceProvider.registerFont(roboto, "Roboto");
+    ctx.typefaceProvider.registerFont(noto, "Noto Color Emoji");
+    const root = Sk.Text({
+      x: 0,
+      y: 0,
+      width,
+      color: "black",
+      fontFamilies: ["Roboto", "Noto Color Emoji"],
+      fontSize: 16,
+      textAlign: "left",
+      maxLines: 4,
+      ellipsis: "...",
+    });
+    root.addChild(
+      Sk.Span({
+        text: "The quick brown fox 🦊",
+      })
+    );
+    const backgroundPaint = Skia.Paint();
+    backgroundPaint.setColor(Skia.Color("black"));
+    const foregroundPaint = Skia.Paint();
+    foregroundPaint.setColor(Skia.Color("white"));
+    root.addChild(
+      Sk.Span({
+        foregroundPaint,
+        backgroundPaint,
+        text: " ate a zesty hamburgerfons 🍔.",
+      })
+    );
+    root.addChild(
+      Sk.Span({
+        color: "pink",
+        text: "\nThe 👩‍👩‍👧‍👧",
+      })
+    );
+    root.addChild(
+      Sk.Span({
+        text: " laughed.",
+      })
+    );
+    root.render(ctx);
+    processResult(surface, "snapshots/drawings/paragraph-with-colors.png");
+  });
 });

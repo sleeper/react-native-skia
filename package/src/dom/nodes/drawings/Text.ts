@@ -25,6 +25,16 @@ import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
 import { enumKey } from "../datatypes";
 
+const addTextStyleProp = <K extends keyof TextStyle>(
+  style: TextStyle,
+  name: K,
+  value: TextStyle[K]
+) => {
+  if (value !== undefined) {
+    style[name] = value;
+  }
+};
+
 const textStyleFromProps = (Skia: Skia, props: TextStyleProps) => {
   const {
     decoration,
@@ -47,20 +57,19 @@ const textStyleFromProps = (Skia: Skia, props: TextStyleProps) => {
     fontStyle,
     textBaseline,
   } = props;
-  const style: TextStyle = {
-    decoration,
-    decorationThickness,
-    fontFamilies,
-    fontFeatures,
-    fontSize,
-    fontVariations,
-    heightMultiplier,
-    halfLeading,
-    letterSpacing,
-    locale,
-    shadows,
-    wordSpacing,
-  };
+  const style: TextStyle = {};
+  addTextStyleProp(style, "decoration", decoration);
+  addTextStyleProp(style, "decorationThickness", decorationThickness);
+  addTextStyleProp(style, "fontFamilies", fontFamilies);
+  addTextStyleProp(style, "fontFeatures", fontFeatures);
+  addTextStyleProp(style, "fontSize", fontSize);
+  addTextStyleProp(style, "fontVariations", fontVariations);
+  addTextStyleProp(style, "heightMultiplier", heightMultiplier);
+  addTextStyleProp(style, "halfLeading", halfLeading);
+  addTextStyleProp(style, "letterSpacing", letterSpacing);
+  addTextStyleProp(style, "locale", locale);
+  addTextStyleProp(style, "shadows", shadows);
+  addTextStyleProp(style, "wordSpacing", wordSpacing);
   if (backgroundColor !== undefined) {
     style.backgroundColor = Skia.Color(backgroundColor);
   }
@@ -87,11 +96,25 @@ const textStyleFromProps = (Skia: Skia, props: TextStyleProps) => {
 
 const processSpans = (builder: SkParagraphBuilder, spans: SkSpan[]) => {
   for (const span of spans) {
-    const { text, children } = span;
+    const { text, children, fg, bg, style } = span;
+    const shouldSavePaint = fg !== undefined || bg !== undefined;
+    const shouldSave = shouldSavePaint || style !== undefined;
+    if (shouldSave) {
+      if (shouldSavePaint) {
+        // TODO: one of the two paint might be undefined
+        // TODO: is this using also the color or can it be a shader too?
+        builder.pushPaintStyle(style!, fg!, bg!);
+      } else {
+        builder.pushStyle(style!);
+      }
+    }
     if (text) {
       builder.addText(text);
     } else if (children) {
       processSpans(builder, children);
+    }
+    if (shouldSave) {
+      builder.pop();
     }
   }
 };
@@ -163,7 +186,12 @@ export class SpanNode extends JsiDeclarationNode<SpanProps, SkSpan> {
   }
 
   materialize() {
-    const { text, foregroundPaint, backgroundPaint } = this.props;
+    const {
+      text,
+      foregroundPaint: fg,
+      backgroundPaint: bg,
+      ...style
+    } = this.props;
     const children = this.children()
       .filter(
         (child): child is JsiDeclarationNode<unknown, SkSpan> =>
@@ -172,9 +200,13 @@ export class SpanNode extends JsiDeclarationNode<SpanProps, SkSpan> {
       .map((child) => child.materialize());
     return {
       text,
-      foregroundPaint,
-      backgroundPaint,
+      fg,
+      bg,
       children,
+      style:
+        Object.keys(style).length !== 0
+          ? textStyleFromProps(this.Skia, style)
+          : undefined,
     };
   }
 }
