@@ -6,6 +6,8 @@ import {
   fitbox,
   Group,
   Image,
+  mix,
+  mixColors,
   Paint,
   Path,
   processTransform2d,
@@ -13,10 +15,16 @@ import {
   rect,
   RoundedRect,
   rrect,
+  runSpring,
   Skia,
+  Spring,
   useImage,
+  useSpring,
+  useTouchHandler,
+  useValue,
 } from "@shopify/react-native-skia";
-import React from "react";
+import React, { useState } from "react";
+import { useComputedValue } from "@shopify/react-native-skia";
 
 const d =
   "M311.927 171.204L170.506 312.626L29.0842 171.204C10.3306 152.451 -0.205078 127.015 -0.205078 100.494C-0.205078 73.972 10.3306 48.5366 29.0842 29.783C47.8379 11.0293 73.2733 0.493674 99.7949 0.493674C126.317 0.493674 151.752 11.0293 170.506 29.783C189.259 11.0293 214.695 0.493652 241.216 0.493652C267.738 0.493652 293.173 11.0293 311.927 29.783C330.681 48.5366 341.216 73.972 341.216 100.494C341.216 127.015 330.681 152.451 311.927 171.204Z";
@@ -40,13 +48,18 @@ interface ProductProps {
 }
 
 export const Product = ({ url, width, height }: ProductProps) => {
+  const [toggled, setToggled] = useState(false);
+  const onTouch = useTouchHandler({ onEnd: () => setToggled((t) => !t) });
+  const progress = useSpring(toggled ? 1 : 0, Spring.Config.Gentle);
+
   const image = useImage(url);
   const rct = rrect(rect(0, 0, width, 1.2 * width), 5, 5);
+
   if (image == null) {
     return null;
   }
   return (
-    <Canvas style={{ width, height }}>
+    <Canvas style={{ width, height }} onTouch={onTouch}>
       <RoundedRect rect={rct} color="#F3F3F3">
         <Paint style="stroke" strokeWidth={1} color="#E7E7E7" />
       </RoundedRect>
@@ -65,6 +78,7 @@ export const Product = ({ url, width, height }: ProductProps) => {
       <Group transform={[{ translateX: width - 2 * r - 5 }, { translateY: 5 }]}>
         <BackdropBlur blur={4} clip={circle}>
           <Fill color="rgba(255, 255, 255, 0.3)" />
+          <Fill color="white" opacity={progress} />
           <Path
             path={heart}
             color="white"
@@ -73,6 +87,7 @@ export const Product = ({ url, width, height }: ProductProps) => {
             strokeCap="round"
             strokeJoin="round"
           />
+          <Path path={heart} color="rgb(64, 14, 228)" opacity={progress} />
         </BackdropBlur>
       </Group>
     </Canvas>

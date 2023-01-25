@@ -6,7 +6,7 @@ import { Product } from "./Product";
 
 export const Products = () => {
   const { width: wWidth } = useWindowDimensions();
-  const width = (wWidth - 48) / 2;
+  const width = wWidth - 64;
   const height = 1.65 * width;
   return (
     <View
@@ -16,18 +16,18 @@ export const Products = () => {
         flexDirection: "row",
         flexWrap: "wrap",
         gap: 16,
-        padding: 16,
+        padding: 32,
       }}
     >
       <Product
         width={width}
         height={height}
-        url="https://firebasestorage.googleapis.com/v0/b/start-react-native.appspot.com/o/miscs%2Fsneakers.jpg?alt=media&token=cf00be7c-f280-47bb-8315-d968f70e69ea"
+        url="https://firebasestorage.googleapis.com/v0/b/start-react-native.appspot.com/o/miscs%2Fdmitry-chernyshov-mP7aPSUm7aE-unsplash.jpg?alt=media&token=b9345aa3-78de-4ea5-974c-e981e5ebcabe"
       />
       <Product
         width={width}
         height={height}
-        url="https://firebasestorage.googleapis.com/v0/b/start-react-native.appspot.com/o/miscs%2Fsneakers-removebg.png?alt=media&token=f1d9fee0-b62c-4f87-a924-93c3c1ea8c33"
+        url="https://firebasestorage.googleapis.com/v0/b/start-react-native.appspot.com/o/miscs%2Fsneakers.jpg?alt=media&token=cf00be7c-f280-47bb-8315-d968f70e69ea"
       />
       <Product
         width={width}
