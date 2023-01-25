@@ -29,6 +29,7 @@ import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
 import type { StackParamList } from "./types";
 import { useAssets } from "./Tests/useAssets";
+import { Products } from "./Examples/Products";
 
 const linking: LinkingOptions<StackParamList> = {
   config: {
@@ -85,7 +86,7 @@ const App = () => {
           screenOptions={{
             headerLeft: HeaderLeft,
           }}
-          initialRouteName={CI ? "Tests" : "Home"}
+          initialRouteName={"Products"}
         >
           <Stack.Screen
             name="Home"
@@ -162,6 +163,7 @@ const App = () => {
           <Stack.Screen name="Graphs" component={GraphsScreen} />
           <Stack.Screen name="Animation" component={AnimationExample} />
           <Stack.Screen name="Performance" component={PerformanceDrawingTest} />
+          <Stack.Screen name="Products" component={Products} />
         </Stack.Navigator>
       </NavigationContainer>
     </FiberProvider>
