@@ -20,4 +20,5 @@ export type StackParamList = {
   Graphs: undefined;
   Animation: undefined;
   Performance: undefined;
+  Globe: undefined;
 };
