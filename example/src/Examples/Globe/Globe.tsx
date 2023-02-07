@@ -16,6 +16,7 @@ import React from "react";
 import { useWindowDimensions } from "react-native";
 
 // https://www.shadertoy.com/view/Ml2XRV
+// https://www.shadertoy.com/view/sdj3Rc
 const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
 uniform float iTime;
@@ -23,62 +24,93 @@ uniform float2 iResolution;
 uniform float2 iImageResolution;
 uniform float r;
 uniform float2 iMouse;
+
+
+const int MAX_MARCHING_STEPS = 255;
+const float MIN_DIST = 0.0;
+const float MAX_DIST = 100.0;
+const float PRECISION = 0.001;
 const float PI = 3.14159265359;
-const float EPSILON = 1e-4;
-const int MAX_STEPS = 100;
-const float MAX_DIST  = 100;
-const float SURF_DIST = .001;
 
+mat2 rotate(float theta) {
+  float s = sin(theta), c = cos(theta);
+  return mat2(c, -s, s, c);
+}
 
-vec2 rotate13(
-    
-  vec2  lrf, 
-  float guvf) {
-float vf  = cos(guvf); 
-  float n   = sin(guvf);
-  mat2  wbxr = mat2(vf,n,n,-vf);
-  
-  return lrf * wbxr;
+float sdSphere(vec3 p, float r )
+{
+  return length(p) - r;
+}
+
+float sdScene(vec3 p) {
+  return sdSphere(p, 1.);
+}
+
+float rayMarch(vec3 ro, vec3 rd) {
+  float depth = MIN_DIST;
+
+  for (int i = 0; i < MAX_MARCHING_STEPS; i++) {
+    vec3 p = ro + depth * rd;
+    float d = sdScene(p);
+    depth += d;
+    if (d < PRECISION || depth > MAX_DIST) break;
+  }
+
+  return depth;
+}
+
+vec3 calcNormal(vec3 p) {
+    vec2 e = vec2(1.0, -1.0) * 0.0005;
+    float r = 2.;
+    return normalize(
+      e.xyy * sdScene(p + e.xyy) +
+      e.yyx * sdScene(p + e.yyx) +
+      e.yxy * sdScene(p + e.yxy) +
+      e.xxx * sdScene(p + e.xxx));
+}
+
+mat3 camera(vec3 cameraPos, vec3 lookAtPoint) {
+	vec3 cd = normalize(lookAtPoint - cameraPos); // camera direction
+	vec3 cr = normalize(cross(vec3(0, 1, 0), cd)); // camera right
+	vec3 cu = normalize(cross(cd, cr)); // camera up
+	
+	return mat3(-cr, cu, -cd);
 }
 
 half4 main( vec2 fragCoord )
 {
-vec2 uv = fragCoord.xy / iResolution.xy;
-  uv -= 0.5;
-  uv.x *= iResolution.x / iResolution.y;
-  uv *= 2.2;
-  vec2 m = (iMouse.xy / iResolution.xy) - 0.5;
-  bool clicked = false;
-  if (length(uv) > 1.0) {
-    return vec4(0.0,0.0,0.0,1.0);
-  }
-  uv = mix(uv,normalize(uv)*(2.0*asin(length(uv)) / 3.1415926),0.5);
-  vec3 n = vec3(uv, sqrt(1.0 - uv.x*uv.x - uv.y*uv.y));
-  uv = normalize(uv)*(2.0*asin(length(uv)) / 3.1415926);
-  
-  float phase = iTime * 0.33;
-  float phase2 = -m.y * 4.0;
-  
-  vec3 lightvec = vec3(1.0,1.0,0.0);
-  if (clicked) {
-    lightvec.yz = rotate13(lightvec.yz, phase2 * 0.5 * 3.1415926);
-  uv.y += phase2;
-  } else {
-    lightvec.xz = rotate13(lightvec.xz, phase * 0.5 * 3.1415926);
-    uv.x += phase;
-  }
+  vec2 uv = (fragCoord-.5*iResolution.xy)/iResolution.y;
+  vec2 m = iMouse.xy/iResolution.xy;
 
-  float lit = mix(1.0, max(0.0, dot(n, normalize(lightvec))), 0.98);
+  half3 col = vec3(0, 0, 0);
   
-  lit += 0.3*pow(1.0 - max(0.0, n.z), 2.0);
+  vec3 lp = vec3(0); // lookat point (aka camera target)
+  vec3 ro = vec3(0, 0, 3); // ray origin that represents camera position
+
+  ro.yz *= rotate(mix(-PI, PI, m.y));
+  ro.xz *= rotate(mix(-PI, PI, m.x));
+
+  vec3 rd = camera(ro, lp) * normalize(vec3(uv, -1)); // ray direction
+
+  float d = rayMarch(ro, rd);
+
+  vec3 p = ro + rd * d;
+  vec3 normal = calcNormal(p);
+  vec3 lightPosition = vec3(4, 4, 7);
+  vec3 lightDirection = normalize(lightPosition - p);
+
+  float diffuse = dot(normal, lightDirection) * 0.5 + 0.5;
   
-  lit = sqrt(lit);
- 
+  vec2 polarUV = vec2(atan(p.x, p.z)/PI, p.y/2.) + 0.5;
+  polarUV.x -= iTime * 0.1;
+  half3 bufferB = image.eval(polarUV * iImageResolution).rgb;
+  half3 sphereColor = diffuse * bufferB;
   
-  uv *= 2.0;
-  vec3 color = image.eval((uv * 0.5 + 0.5) * iImageResolution).rgb;
-  
-return vec4(color,1.0);
+  col = mix(col, sphereColor, step(d - MAX_DIST, 0.));
+  if (col == vec3(0, 0, 0)) {
+    return vec4(0, 0, 0, 0);
+  }
+  return vec4(col, 1.0);
 }`)!;
 
 export const Globe = () => {
@@ -98,7 +130,7 @@ export const Globe = () => {
   const earth = useImage(require("./assets/earth.jpg"));
   const uniforms = useComputedValue(() => {
     return {
-      iTime: clock.current / 6000,
+      iTime: clock.current / 2000,
       iResolution: [width, height],
       iImageResolution: [earth?.width() ?? 0, earth?.height() ?? 0],
       r: center.x - 32,

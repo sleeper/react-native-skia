@@ -87,6 +87,8 @@ const App = () => {
             headerLeft: HeaderLeft,
           }}
         >
+          <Stack.Screen name="Hue" component={Hue} />
+
           <Stack.Screen
             name="Globe"
             key="Globe"
@@ -123,7 +125,6 @@ const App = () => {
           <Stack.Screen name="Breathe" component={Breathe} />
           <Stack.Screen name="Filters" component={Filters} />
           <Stack.Screen name="Gooey" component={Gooey} />
-          <Stack.Screen name="Hue" component={Hue} />
           <Stack.Screen
             name="Matrix"
             component={Matrix}
