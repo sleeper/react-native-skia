@@ -23,6 +23,8 @@ import { useWindowDimensions } from "react-native";
 // https://www.shadertoy.com/view/sdj3Rc
 const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
+uniform shader clouds;
+
 uniform float iTime;
 uniform float2 iResolution;
 uniform float2 iImageResolution;
@@ -97,16 +99,15 @@ half4 main( vec2 fragCoord )
   float d = rayMarch(ro, rd);
 
   vec3 p = ro + rd * d;
-  vec3 normal = calcNormal(p);
-  vec3 lightPosition = vec3(4, 4, 7);
-  vec3 lightDirection = normalize(lightPosition - p);
-
-  float diffuse = dot(normal, lightDirection) * 0.5 + 0.5;
   
   vec2 polarUV = vec2(atan(p.x, p.z)/PI, p.y/2.) + 0.5;
   polarUV.x -= iTime * 0.1;
   half3 bufferB = image.eval(polarUV * iImageResolution).rgb;
-  half3 sphereColor = diffuse * bufferB;
+  half3 sphereColor = bufferB;
+
+  polarUV.x -= iTime * 0.05;
+  half3 bufferC = clouds.eval(polarUV * iImageResolution).rgb;
+  sphereColor = mix(sphereColor, bufferC, 0.3);
   
   col = mix(col, sphereColor, step(d - MAX_DIST, 0.));
   if (col == vec3(0, 0, 0)) {
@@ -138,6 +139,7 @@ export const Globe = () => {
     require("./assets/SPACE-BG-smaller-extend-down-tiny.png")
   );
   const earth = useImage(require("./assets/earth.jpg"));
+  const clouds = useImage(require("./assets/clouds/2.jpg"));
   const uniforms = useComputedValue(() => {
     return {
       iTime: clock.current / 2000,
@@ -146,7 +148,7 @@ export const Globe = () => {
       iMouse: [x.current, -y.current],
     };
   }, [clock, earth]);
-  if (!bg || !earth || !font) {
+  if (!bg || !earth || !font || !clouds) {
     return null;
   }
   return (
@@ -163,6 +165,7 @@ export const Globe = () => {
           transform={[{ scale: 1 }]}
         >
           <ImageShader image={earth} tx="repeat" ty="repeat" />
+          <ImageShader image={clouds} tx="repeat" ty="repeat" />
         </Shader>
       </Fill>
       {/* <Text
