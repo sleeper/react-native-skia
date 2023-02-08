@@ -87,8 +87,6 @@ const App = () => {
             headerLeft: HeaderLeft,
           }}
         >
-          <Stack.Screen name="Hue" component={Hue} />
-
           <Stack.Screen
             name="Globe"
             key="Globe"
@@ -97,6 +95,8 @@ const App = () => {
               header: () => null,
             }}
           />
+          <Stack.Screen name="Hue" component={Hue} />
+
           <Stack.Screen
             name="Home"
             key="Home"

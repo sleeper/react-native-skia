@@ -1,6 +1,6 @@
 import {
   Canvas,
-  Fill,
+  Text,
   Image,
   ImageShader,
   Shader,
@@ -11,6 +11,10 @@ import {
   useTouchHandler,
   vec,
   useValue,
+  Circle,
+  BlurMask,
+  useFont,
+  Fill,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { useWindowDimensions } from "react-native";
@@ -22,7 +26,6 @@ uniform shader image;
 uniform float iTime;
 uniform float2 iResolution;
 uniform float2 iImageResolution;
-uniform float r;
 uniform float2 iMouse;
 
 
@@ -43,7 +46,7 @@ float sdSphere(vec3 p, float r )
 }
 
 float sdScene(vec3 p) {
-  return sdSphere(p, 1.);
+  return sdSphere(p, 1.0);
 }
 
 float rayMarch(vec3 ro, vec3 rd) {
@@ -73,7 +76,6 @@ mat3 camera(vec3 cameraPos, vec3 lookAtPoint) {
 	vec3 cd = normalize(lookAtPoint - cameraPos); // camera direction
 	vec3 cr = normalize(cross(vec3(0, 1, 0), cd)); // camera right
 	vec3 cu = normalize(cross(cd, cr)); // camera up
-	
 	return mat3(-cr, cu, -cd);
 }
 
@@ -114,14 +116,22 @@ half4 main( vec2 fragCoord )
 }`)!;
 
 export const Globe = () => {
+  const font = useFont(require("../../assets/SF-Pro-Display-Bold.otf"), 46);
   const clock = useClockValue();
   const { width, height } = useWindowDimensions();
   const center = vec(width / 2, height / 2);
-  const touch = useValue({ x: 0, y: 0 });
+  const x = useValue(0);
+  const y = useValue(0);
+  const offsetX = useValue(0);
+  const offsetY = useValue(0);
   const onTouch = useTouchHandler({
-    onActive: (e) => {
-      touch.current.x = e.x;
-      touch.current.y = e.y;
+    onStart: (pos) => {
+      offsetX.current = x.current - pos.x;
+      offsetY.current = y.current - pos.y;
+    },
+    onActive: (pos) => {
+      x.current = offsetX.current + pos.x;
+      y.current = offsetY.current + pos.y;
     },
   });
   const bg = useImage(
@@ -133,22 +143,42 @@ export const Globe = () => {
       iTime: clock.current / 2000,
       iResolution: [width, height],
       iImageResolution: [earth?.width() ?? 0, earth?.height() ?? 0],
-      r: center.x - 32,
-      iMouse: touch.current,
+      iMouse: [x.current, -y.current],
     };
   }, [clock, earth]);
-  if (!bg || !earth) {
+  if (!bg || !earth || !font) {
     return null;
   }
   return (
     <Canvas style={{ flex: 1 }} onTouch={onTouch}>
       <Image image={bg} x={0} y={0} width={width} height={height} fit="cover" />
-      {/* <Circle c={center} r={center.x - 32}> */}
+      <Circle c={center} r={center.x + 100} color="#717b96">
+        <BlurMask blur={50} style="solid" />
+      </Circle>
       <Fill>
-        <Shader source={source} uniforms={uniforms}>
+        <Shader
+          source={source}
+          uniforms={uniforms}
+          origin={center}
+          transform={[{ scale: 1 }]}
+        >
           <ImageShader image={earth} tx="repeat" ty="repeat" />
         </Shader>
       </Fill>
+      {/* <Text
+        text="The Planet"
+        x={(width - font.getTextWidth("The Planet")) / 2}
+        y={center.y + 220}
+        font={font}
+        color="white"
+      />
+      <Text
+        text="Thanks You"
+        x={(width - font.getTextWidth("Thanks You")) / 2}
+        y={center.y + 300}
+        font={font}
+        color="white"
+      /> */}
     </Canvas>
   );
 };
