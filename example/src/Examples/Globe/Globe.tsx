@@ -27,30 +27,48 @@ const float MAX_DIST = 100.0;
 const float PRECISION = 0.001;
 const float PI = 3.14159265359;
 
+struct Surface {
+  float sd;
+  vec3 col;
+};
+
 mat2 rotate(float theta) {
   float s = sin(theta), c = cos(theta);
   return mat2(c, -s, s, c);
+}
+
+Surface sdSphere(vec3 p, float r, vec3 col) {
+  float d = length(p) - r;
+  return Surface(d, col);
+}
+
+Surface minWithColor(Surface obj1, Surface obj2) {
+  if (obj2.sd < obj1.sd) return obj2; // The sd component of the struct holds the "signed distance" value
+  return obj1;
 }
 
 float sdSphere(vec3 p, float r) {
   return length(p) - r;
 }
 
-float sdScene(vec3 p) {
-  float entity = sdSphere(p, 1.0);
-  entity = min(entity, sdSphere(p - vec3(-1.2, 0, 0), 0.2));
+Surface sdScene(vec3 p) {
+  Surface entity = sdSphere(p, 1.0, vec3(1, 0, 0));
+  entity = minWithColor(entity, sdSphere(p - vec3(-1.2, 0, 0), 0.2, vec3(0.3, 0.6, 0.9)));
   return entity;
 }
 
-float rayMarch(vec3 ro, vec3 rd) {
+Surface rayMarch(vec3 ro, vec3 rd) {
   float depth = MIN_DIST;
+  Surface co; // closest object
   for (int i = 0; i < MAX_MARCHING_STEPS; i++) {
     vec3 p = ro + depth * rd;
-    float d = sdScene(p);
+    co = sdScene(p);
+    float d = co.sd;
     depth += d;
     if (d < PRECISION || depth > MAX_DIST) break;
   }
-  return depth;
+  co.sd = depth;
+  return co;
 }
 
 mat3 camera(vec3 cameraPos, vec3 lookAtPoint) {
@@ -70,11 +88,14 @@ half4 main(vec2 fragCoord) {
   ro.yz *= rotate(mix(-PI, PI, m.y));
   ro.xz *= rotate(mix(-PI, PI, m.x));
   vec3 rd = camera(ro, lp) * normalize(vec3(uv, -1)); // ray direction
-  float d = rayMarch(ro, rd);
+  Surface co = rayMarch(ro, rd);
+  float d = co.sd;
   vec3 p = ro + rd * d;
-  
+  if (co.col == vec3(0.3, 0.6, 0.9)) {
+    return vec4(0.3, 0.6, 0.9, 1);
+  }
   vec2 polarUV = vec2(atan(p.x, p.z)/PI, p.y/2.) + 0.5;
-  polarUV.x -= iTime * 0.1;
+  //polarUV.x -= iTime * 0.1;
   half3 bufferB = image.eval(polarUV * iImageResolution).rgb;
   half3 sphereColor = bufferB;
   col = mix(col, sphereColor, step(d - MAX_DIST, 0.));
