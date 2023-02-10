@@ -11,8 +11,6 @@ import {
   useImage,
   useTouchHandler,
   useValue,
-  Circle,
-  BlurMask,
   runDecay,
 } from "@shopify/react-native-skia";
 
@@ -22,7 +20,7 @@ uniform float iTime;
 uniform float2 iResolution;
 uniform float2 iImageResolution;
 uniform float2 iMouse;
-uniform float2 arc;
+
 const int MAX_MARCHING_STEPS = 255;
 const float MIN_DIST = 0.0;
 const float MAX_DIST = 100.0;
@@ -40,6 +38,7 @@ float sdSphere(vec3 p, float r) {
 
 float sdScene(vec3 p) {
   float entity = sdSphere(p, 1.0);
+  entity = min(entity, sdSphere(p - vec3(-1.2, 0, 0), 0.2));
   return entity;
 }
 
@@ -54,22 +53,13 @@ float rayMarch(vec3 ro, vec3 rd) {
   return depth;
 }
 
-vec3 calcNormal(vec3 p) {
-    vec2 e = vec2(1.0, -1.0) * 0.0005;
-    float r = 2.;
-    return normalize(
-      e.xyy * sdScene(p + e.xyy) +
-      e.yyx * sdScene(p + e.yyx) +
-      e.yxy * sdScene(p + e.yxy) +
-      e.xxx * sdScene(p + e.xxx));
-}
-
 mat3 camera(vec3 cameraPos, vec3 lookAtPoint) {
 	vec3 cd = normalize(lookAtPoint - cameraPos); // camera direction
 	vec3 cr = normalize(cross(vec3(0, 1, 0), cd)); // camera right
 	vec3 cu = normalize(cross(cd, cr)); // camera up
 	return mat3(-cr, cu, -cd);
 }
+
 half4 main(vec2 fragCoord) {
   vec2 uv = (fragCoord-.5*iResolution.xy)/iResolution.y;
   vec2 m = iMouse.xy/iResolution.xy;
@@ -109,9 +99,7 @@ const arcsData = [
   },
 ];
 
-interface SkiaGlobeProps {}
-
-export const Globe = ({}: SkiaGlobeProps) => {
+export const Globe = () => {
   const size = 375;
   const x = useValue(0);
   const y = useValue(0);
@@ -136,7 +124,6 @@ export const Globe = ({}: SkiaGlobeProps) => {
   const clock = useClockValue();
   const uniforms = useComputedValue(() => {
     return {
-      arc: [arcsData[0].start.lat, arcsData[0].start.long],
       iTime: clock.current / 2000,
       iResolution: [size, size],
       iImageResolution: [earth?.width() ?? 0, earth?.height() ?? 0],
