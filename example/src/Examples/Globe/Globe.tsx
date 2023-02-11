@@ -14,6 +14,7 @@ import {
   runDecay,
 } from "@shopify/react-native-skia";
 
+// shader toy: https://www.shadertoy.com/view/fdlGWX
 const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
 uniform float iTime;
@@ -52,8 +53,13 @@ float sdSphere(vec3 p, float r) {
 }
 
 Surface sdScene(vec3 p) {
-  Surface entity = sdSphere(p, 1.0, vec3(1, 0, 0));
-  entity = minWithColor(entity, sdSphere(p - vec3(-1.2, 0, 0), 0.2, vec3(0.3, 0.6, 0.9)));
+  Surface globe = sdSphere(p, 1.0, vec3(0, 1, 0));
+  float r1 = 0.03;
+  vec3 col = vec3(0.3, 0.6, 0.9);
+  Surface p1 = sdSphere(p - vec3(1 + r1/2, 0, 0), r1, col);
+  Surface p2 = sdSphere(p - vec3(0, 0, 1 + r1/2), r1, col);
+  Surface entity = minWithColor(globe, p1);
+  entity = minWithColor(entity, p2);
   return entity;
 }
 
@@ -63,9 +69,8 @@ Surface rayMarch(vec3 ro, vec3 rd) {
   for (int i = 0; i < MAX_MARCHING_STEPS; i++) {
     vec3 p = ro + depth * rd;
     co = sdScene(p);
-    float d = co.sd;
-    depth += d;
-    if (d < PRECISION || depth > MAX_DIST) break;
+    depth += co.sd;
+    if (co.sd < PRECISION || depth > MAX_DIST) break;
   }
   co.sd = depth;
   return co;
@@ -80,25 +85,25 @@ mat3 camera(vec3 cameraPos, vec3 lookAtPoint) {
 
 half4 main(vec2 fragCoord) {
   vec2 uv = (fragCoord-.5*iResolution.xy)/iResolution.y;
-  vec2 m = iMouse.xy/iResolution.xy;
+  vec2 m = (iMouse.xy + vec2(0, 0))/iResolution.xy;
   half3 col = vec3(0, 0, 0);
   
   vec3 lp = vec3(0); // lookat point (aka camera target)
-  vec3 ro = vec3(0, 0, 3); // ray origin that represents camera position
+  vec3 ro = vec3(0, 0, 2.5); // ray origin that represents camera position
   ro.yz *= rotate(mix(-PI, PI, m.y));
   ro.xz *= rotate(mix(-PI, PI, m.x));
   vec3 rd = camera(ro, lp) * normalize(vec3(uv, -1)); // ray direction
   Surface co = rayMarch(ro, rd);
   float d = co.sd;
   vec3 p = ro + rd * d;
-  if (co.col == vec3(0.3, 0.6, 0.9)) {
-    return vec4(0.3, 0.6, 0.9, 1);
+  if (co.col == vec3(0, 1, 0)) {
+    vec2 polarUV = vec2(atan(p.x, p.z)/PI, p.y/2.) + 0.5;
+    half3 bufferB = image.eval(polarUV * iImageResolution).rgb;
+    half3 sphereColor = bufferB;
+    col = mix(col, sphereColor, step(d - MAX_DIST, 0.));
+  } else {
+    col = co.col;
   }
-  vec2 polarUV = vec2(atan(p.x, p.z)/PI, p.y/2.) + 0.5;
-  //polarUV.x -= iTime * 0.1;
-  half3 bufferB = image.eval(polarUV * iImageResolution).rgb;
-  half3 sphereColor = bufferB;
-  col = mix(col, sphereColor, step(d - MAX_DIST, 0.));
   if (col == vec3(0, 0, 0)) {
     return vec4(0, 0, 0, 0);
   }
@@ -145,7 +150,7 @@ export const Globe = () => {
   const clock = useClockValue();
   const uniforms = useComputedValue(() => {
     return {
-      iTime: clock.current / 2000,
+      iTime: clock.current * 0.03,
       iResolution: [size, size],
       iImageResolution: [earth?.width() ?? 0, earth?.height() ?? 0],
       iMouse: [x.current, -y.current],
