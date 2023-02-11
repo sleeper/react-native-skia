@@ -54,7 +54,12 @@ vec3 sdRep( vec3 p, vec3 c ) {
     return mod(p,c)-0.5*c;
 }
 
-
+float sdCapsule( vec3 p, vec3 a, vec3 b, float r )
+{
+  vec3 pa = p - a, ba = b - a;
+  float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
+  return length( pa - ba*h ) - r;
+}
 struct Sphere {
   float3 center;
   float r;
@@ -73,8 +78,10 @@ float dist_field(vec3 p) {
     float d1 = sdSphere(p - s1.center, s1.r);
     float d2 = sdSphere(p - s2.center, s2.r);
     float d3 = sdSphere(p - s3.center, s3.r);
+    float d4 = sdCapsule(p, s2.center, vec3(-1.2, 0, 0), r);
     float d = sdUnion(d1, d2);
     d = sdUnion(d, d3);
+    d = sdUnion(d, d4);
     return d;
 }
 
