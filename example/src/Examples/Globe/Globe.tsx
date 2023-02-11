@@ -14,101 +14,41 @@ import {
   runDecay,
 } from "@shopify/react-native-skia";
 
+import { frag, Three } from "./ShaderLib";
+
 // shader toy: https://www.shadertoy.com/view/fdlGWX
-const source = Skia.RuntimeEffect.Make(`
+// https://www.shadertoy.com/view/XsB3Rm
+const source = frag`
 uniform shader image;
 uniform float iTime;
 uniform float2 iResolution;
 uniform float2 iImageResolution;
 uniform float2 iMouse;
 
-const int MAX_MARCHING_STEPS = 255;
-const float MIN_DIST = 0.0;
-const float MAX_DIST = 100.0;
-const float PRECISION = 0.001;
-const float PI = 3.14159265359;
 
-struct Surface {
-  float sd;
-  vec3 col;
-};
-
-mat2 rotate(float theta) {
-  float s = sin(theta), c = cos(theta);
-  return mat2(c, -s, s, c);
-}
-
-Surface sdSphere(vec3 p, float r, vec3 col) {
-  float d = length(p) - r;
-  return Surface(d, col);
-}
-
-Surface minWithColor(Surface obj1, Surface obj2) {
-  if (obj2.sd < obj1.sd) return obj2; // The sd component of the struct holds the "signed distance" value
-  return obj1;
-}
-
-float sdSphere(vec3 p, float r) {
-  return length(p) - r;
-}
-
-Surface sdScene(vec3 p) {
-  Surface globe = sdSphere(p, 1.0, vec3(0, 1, 0));
-  float r1 = 0.03;
-  vec3 col = vec3(0.3, 0.6, 0.9);
-  Surface p1 = sdSphere(p - vec3(1 + r1/2, 0, 0), r1, col);
-  Surface p2 = sdSphere(p - vec3(0, 0, 1 + r1/2), r1, col);
-  Surface entity = minWithColor(globe, p1);
-  entity = minWithColor(entity, p2);
-  return entity;
-}
-
-Surface rayMarch(vec3 ro, vec3 rd) {
-  float depth = MIN_DIST;
-  Surface co; // closest object
-  for (int i = 0; i < MAX_MARCHING_STEPS; i++) {
-    vec3 p = ro + depth * rd;
-    co = sdScene(p);
-    depth += co.sd;
-    if (co.sd < PRECISION || depth > MAX_DIST) break;
-  }
-  co.sd = depth;
-  return co;
-}
-
-mat3 camera(vec3 cameraPos, vec3 lookAtPoint) {
-	vec3 cd = normalize(lookAtPoint - cameraPos); // camera direction
-	vec3 cr = normalize(cross(vec3(0, 1, 0), cd)); // camera right
-	vec3 cu = normalize(cross(cd, cr)); // camera up
-	return mat3(-cr, cu, -cd);
-}
+${Three}
 
 half4 main(vec2 fragCoord) {
-  vec2 uv = (fragCoord-.5*iResolution.xy)/iResolution.y;
-  vec2 m = (iMouse.xy + vec2(0, 0))/iResolution.xy;
-  half3 col = vec3(0, 0, 0);
-  
-  vec3 lp = vec3(0); // lookat point (aka camera target)
-  vec3 ro = vec3(0, 0, 2.5); // ray origin that represents camera position
-  ro.yz *= rotate(mix(-PI, PI, m.y));
-  ro.xz *= rotate(mix(-PI, PI, m.x));
-  vec3 rd = camera(ro, lp) * normalize(vec3(uv, -1)); // ray direction
-  Surface co = rayMarch(ro, rd);
-  float d = co.sd;
-  vec3 p = ro + rd * d;
-  if (co.col == vec3(0, 1, 0)) {
-    vec2 polarUV = vec2(atan(p.x, p.z)/PI, p.y/2.) + 0.5;
-    half3 bufferB = image.eval(polarUV * iImageResolution).rgb;
-    half3 sphereColor = bufferB;
-    col = mix(col, sphereColor, step(d - MAX_DIST, 0.));
-  } else {
-    col = co.col;
-  }
-  if (col == vec3(0, 0, 0)) {
-    return vec4(0, 0, 0, 0);
-  }
-  return vec4(col, 1.0);
-}`)!;
+	// default ray dir
+	vec3 dir = ray_dir(45.0, iResolution.xy, fragCoord.xy);
+	// default ray origin
+	vec3 eye = vec3(0.0, 0.0, 3);
+	// rotate camera
+	mat3 rot = rotationXY((iMouse.xy - iResolution.xy * 0.5).yx * vec2( 0.01, -0.01 ));
+	dir = rot * dir;
+	eye = rot * eye;
+	// ray marching
+  float depth = clip_far;
+  vec3 n = vec3(0.0);
+	if (!ray_marching(eye, dir, depth, n)) {
+		return vec4(0, 0, 0, 1);
+	}
+	// shading
+	vec3 pos = eye + dir * depth;  
+  vec3 color = shading(pos, n, dir, eye);
+	return vec4(n, 1.0);
+}
+`;
 
 const arcColorStart = "#7629ed";
 const arcColorEnd = "#CB6BED";
@@ -127,8 +67,8 @@ const arcsData = [
 
 export const Globe = () => {
   const size = 375;
-  const x = useValue(0);
-  const y = useValue(0);
+  const x = useValue(size / 2);
+  const y = useValue(size / 2);
   const offsetX = useValue(0);
   const offsetY = useValue(0);
   const onTouch = useTouchHandler({
@@ -153,7 +93,7 @@ export const Globe = () => {
       iTime: clock.current * 0.03,
       iResolution: [size, size],
       iImageResolution: [earth?.width() ?? 0, earth?.height() ?? 0],
-      iMouse: [x.current, -y.current],
+      iMouse: [x.current, y.current],
     };
   }, [clock, earth]);
 
