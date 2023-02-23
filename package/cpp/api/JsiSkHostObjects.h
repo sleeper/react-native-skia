@@ -66,7 +66,7 @@ public:
   /*
    Override to receive notifications when the inner object is changed
    */
-  virtual void onObjectChanged(){};
+  virtual void onObjectChanged() {}
 
 private:
   /**
