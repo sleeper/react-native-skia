@@ -51,14 +51,22 @@ public:
    * should be wrapped in a shared pointer of some kind
    * @return Underlying object
    */
-  virtual T &getObject() { return _object; }
+  T &getObject() { return _object; }
   const T &getObject() const { return const_cast<const T &>(getObject()); }
 
   /**
    Updates the inner object with a new version of the object.
    */
-  void setObject(T &object) { _object = object; }
-  void setObject(const T &object) { _object = object; }
+  void setObject(T &object) { setObject(const_cast<const T &>(object)); }
+  void setObject(const T &object) {
+    onObjectChanged();
+    _object = object;
+  }
+
+  /*
+   Override to receive notifications when the inner object is changed
+   */
+  virtual void onObjectChanged(){};
 
 private:
   /**

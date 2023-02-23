@@ -70,9 +70,7 @@ public:
     auto quality = count == 2 ? arguments[1].asNumber() : 100.0;
 
     // Get data
-    auto data =
-        JsiSkWrappingSkPtrHostObject<SkImage>::getObject()->encodeToData(
-            format, quality);
+    auto data = getObject()->encodeToData(format, quality);
     auto arrayCtor =
         runtime.global().getPropertyAsFunction(runtime, "Uint8Array");
     size_t size = data->size();
@@ -98,9 +96,7 @@ public:
 
     auto quality = count == 2 ? arguments[1].asNumber() : 100.0;
 
-    auto data =
-        JsiSkWrappingSkPtrHostObject<SkImage>::getObject()->encodeToData(
-            format, quality);
+    auto data = getObject()->encodeToData(format, quality);
     auto len = SkBase64::Encode(data->bytes(), data->size(), nullptr);
     auto buffer = std::string(len, 0);
     SkBase64::Encode(data->bytes(), data->size(),
@@ -120,6 +116,16 @@ public:
       : JsiSkWrappingSkPtrHostObject<SkImage>(std::move(context),
                                               std::move(image)) {}
 
+  void onObjectChanged() override { _textureImage = nullptr; }
+
+  sk_sp<SkImage> asTextureImage() {
+    if (_textureImage == nullptr) {
+      _textureImage = getObject()->makeTextureImage(
+          getContext()->getDirectContext(), GrMipmapped::kNo, SkBudgeted::kNo);
+    }
+    return _textureImage;
+  }
+
   /**
   Returns the underlying object from a host object of this type
  */
@@ -128,20 +134,8 @@ public:
     return obj.asObject(runtime).asHostObject<JsiSkImage>(runtime)->getObject();
   }
 
-  sk_sp<SkImage> &getObject() override {
-    auto image = JsiSkWrappingSkPtrHostObject<SkImage>::getObject();
-    if (image != _prevImage) {
-      _prevImage = image;
-      _textureImage =
-          image->makeTextureImage(getContext()->getDirectContext().get(),
-                                  GrMipmapped::kNo, SkBudgeted::kNo);
-    }
-    return _textureImage;
-  }
-
 private:
-  sk_sp<SkImage> _textureImage;
-  sk_sp<SkImage> _prevImage = nullptr;
+  sk_sp<SkImage> _textureImage = nullptr;
 };
 
 } // namespace RNSkia

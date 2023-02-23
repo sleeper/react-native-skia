@@ -45,7 +45,10 @@ public:
                                std::string(getName()) + " property.");
     }
 
-    setDerivedValue(ptr->getObject());
+    // We can convert this one to a texture image since we know we're on the same
+    // thread as where the drawing happens - meaning that the texture image will
+    // be created in the same GPU context as the one we're drawing in.
+    setDerivedValue(ptr->asTextureImage());
   }
 
 private:
