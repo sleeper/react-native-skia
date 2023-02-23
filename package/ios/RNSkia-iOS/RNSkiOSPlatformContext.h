@@ -54,6 +54,7 @@ public:
 
   void startDrawLoop() override;
   void stopDrawLoop() override;
+  sk_sp<GrDirectContext> getDirectContext() override;
 
   virtual void performStreamOperation(
       const std::string &sourceUri,

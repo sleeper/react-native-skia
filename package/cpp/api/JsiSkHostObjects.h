@@ -51,8 +51,8 @@ public:
    * should be wrapped in a shared pointer of some kind
    * @return Underlying object
    */
-  T &getObject() { return _object; }
-  const T &getObject() const { return _object; }
+  virtual T &getObject() { return _object; }
+  const T &getObject() const { return const_cast<const T &>(getObject()); }
 
   /**
    Updates the inner object with a new version of the object.

@@ -73,6 +73,13 @@ public:
    */
   void teardown();
 
+  /**
+   * To be able to use static contexts (and avoid reloading the skia context for
+   * each new view, we track the OpenGL and Skia drawing context per thread.
+   * @return The drawing context for the current thread
+   */
+  static std::shared_ptr<OpenGLDrawingContext> getThreadDrawingContext();
+
 private:
   /**
    * Initializes all required OpenGL and Skia objects
@@ -110,13 +117,6 @@ private:
    * @return True if initialization went well
    */
   bool ensureSkiaSurface(int width, int height);
-
-  /**
-   * To be able to use static contexts (and avoid reloading the skia context for
-   * each new view, we track the OpenGL and Skia drawing context per thread.
-   * @return The drawing context for the current thread
-   */
-  static std::shared_ptr<OpenGLDrawingContext> getThreadDrawingContext();
 
   EGLSurface _glSurface = EGL_NO_SURFACE;
 

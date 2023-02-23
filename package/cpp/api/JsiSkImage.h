@@ -70,7 +70,9 @@ public:
     auto quality = count == 2 ? arguments[1].asNumber() : 100.0;
 
     // Get data
-    auto data = getObject()->encodeToData(format, quality);
+    auto data =
+        JsiSkWrappingSkPtrHostObject<SkImage>::getObject()->encodeToData(
+            format, quality);
     auto arrayCtor =
         runtime.global().getPropertyAsFunction(runtime, "Uint8Array");
     size_t size = data->size();
@@ -96,7 +98,9 @@ public:
 
     auto quality = count == 2 ? arguments[1].asNumber() : 100.0;
 
-    auto data = getObject()->encodeToData(format, quality);
+    auto data =
+        JsiSkWrappingSkPtrHostObject<SkImage>::getObject()->encodeToData(
+            format, quality);
     auto len = SkBase64::Encode(data->bytes(), data->size(), nullptr);
     auto buffer = std::string(len, 0);
     SkBase64::Encode(data->bytes(), data->size(),
@@ -123,6 +127,21 @@ public:
                                   const jsi::Value &obj) {
     return obj.asObject(runtime).asHostObject<JsiSkImage>(runtime)->getObject();
   }
+
+  sk_sp<SkImage> &getObject() override {
+    auto image = JsiSkWrappingSkPtrHostObject<SkImage>::getObject();
+    if (image != _prevImage) {
+      _prevImage = image;
+      _textureImage =
+          image->makeTextureImage(getContext()->getDirectContext().get(),
+                                  GrMipmapped::kNo, SkBudgeted::kNo);
+    }
+    return _textureImage;
+  }
+
+private:
+  sk_sp<SkImage> _textureImage;
+  sk_sp<SkImage> _prevImage = nullptr;
 };
 
 } // namespace RNSkia

@@ -15,11 +15,18 @@
 /** Static members */
 std::shared_ptr<MetalRenderContext>
 RNSkMetalCanvasProvider::getMetalRenderContext() {
+  static std::unordered_map<std::thread::id,
+                            std::shared_ptr<MetalRenderContext>>
+      renderContexts;
+
   auto threadId = std::this_thread::get_id();
   if (renderContexts.count(threadId) == 0) {
     auto drawingContext = std::make_shared<MetalRenderContext>();
-    drawingContext->commandQueue = nullptr;
-    drawingContext->skContext = nullptr;
+    auto device = MTLCreateSystemDefaultDevice();
+    drawingContext->commandQueue =
+        id<MTLCommandQueue>(CFRetain((GrMTLHandle)[device newCommandQueue]));
+    drawingContext->skContext = GrDirectContext::MakeMetal(
+        (__bridge void *)device, (__bridge void *)drawingContext->commandQueue);
     renderContexts.emplace(threadId, drawingContext);
   }
   return renderContexts.at(threadId);
@@ -85,14 +92,6 @@ void RNSkMetalCanvasProvider::renderToCanvas(
 
   // Get render context for current thread
   auto renderContext = getMetalRenderContext();
-
-  if (renderContext->skContext == nullptr) {
-    auto device = MTLCreateSystemDefaultDevice();
-    renderContext->commandQueue =
-        id<MTLCommandQueue>(CFRetain((GrMTLHandle)[device newCommandQueue]));
-    renderContext->skContext = GrDirectContext::MakeMetal(
-        (__bridge void *)device, (__bridge void *)renderContext->commandQueue);
-  }
 
   // Wrap in auto release pool since we want the system to clean up after
   // rendering and not wait until later - we've seen some example of memory

@@ -4,6 +4,7 @@
 #include <thread>
 #include <utility>
 
+#include "RNSkMetalCanvasProvider.h"
 #include <RNSkMeasureTime.h>
 #include <SkiaMetalRenderer.h>
 
@@ -78,6 +79,10 @@ void RNSkiOSPlatformContext::stopDrawLoop() {
     [_displayLink stop];
     _displayLink = nullptr;
   }
+}
+
+sk_sp<GrDirectContext> RNSkiOSPlatformContext::getDirectContext() {
+  return RNSkMetalCanvasProvider::getMetalRenderContext()->skContext;
 }
 
 } // namespace RNSkia

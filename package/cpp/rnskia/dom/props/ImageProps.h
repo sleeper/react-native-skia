@@ -38,7 +38,7 @@ public:
                                std::string(getName()) + " property.");
     }
 
-    auto ptr = std::dynamic_pointer_cast<JsiSkImage>(
+    auto ptr = std::static_pointer_cast<JsiSkImage>(
         _imageProp->value().getAsHostObject());
     if (ptr == nullptr) {
       throw std::runtime_error("Expected SkImage object for the " +

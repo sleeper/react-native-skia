@@ -16,6 +16,7 @@
 
 #include "SkStream.h"
 #include "SkSurface.h"
+#import <include/gpu/GrDirectContext.h>
 
 #pragma clang diagnostic pop
 
@@ -197,6 +198,7 @@ public:
   // destructor.
   virtual void startDrawLoop() {}
   virtual void stopDrawLoop() {}
+  virtual sk_sp<GrDirectContext> getDirectContext() = 0;
 
 private:
   float _pixelDensity;
