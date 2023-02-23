@@ -81,8 +81,8 @@ void RNSkiOSPlatformContext::stopDrawLoop() {
   }
 }
 
-sk_sp<GrDirectContext> RNSkiOSPlatformContext::getDirectContext() {
-  return RNSkMetalCanvasProvider::getMetalRenderContext()->skContext;
+GrDirectContext *RNSkiOSPlatformContext::getDirectContext() {
+  return RNSkMetalCanvasProvider::getMetalRenderContext()->skContext.get();
 }
 
 } // namespace RNSkia

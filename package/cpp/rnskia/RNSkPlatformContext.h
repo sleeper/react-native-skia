@@ -198,7 +198,7 @@ public:
   // destructor.
   virtual void startDrawLoop() {}
   virtual void stopDrawLoop() {}
-  virtual sk_sp<GrDirectContext> getDirectContext() = 0;
+  virtual GrDirectContext *getDirectContext() = 0;
 
 private:
   float _pixelDensity;

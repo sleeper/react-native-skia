@@ -45,8 +45,8 @@ public:
 
   void stopDrawLoop() override { _jniPlatformContext->stopDrawLoop(); }
 
-  sk_sp<GrDirectContext> getDirectContext() override {
-    return SkiaOpenGLRenderer::getThreadDrawingContext()->skContext;
+  GrDirectContext *getDirectContext() override {
+    return SkiaOpenGLRenderer::getThreadDrawingContext()->skContext.get();
   }
 
 private:
