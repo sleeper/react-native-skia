@@ -29,7 +29,7 @@ uniform float2 iMouse;
 uniform float angles[10];
 uniform vec3 positions[10];
 
-const int MAX_MARCHING_STEPS = 255;
+const int MAX_MARCHING_STEPS = 100;
 const float MIN_DIST = 0.0;
 const float MAX_DIST = 100.0;
 const float PRECISION = 0.001;
@@ -42,6 +42,39 @@ float sdCappedTorus(in vec3 p,in vec2 sc,in float ra,in float rb)
   return sqrt(dot(p,p)+ra*ra-2.*ra*k)-rb;
 }
 
+float sdArcs(vec3 p){
+  float k=10000.;
+  float j=0.;
+  for(int i=0;i<5;i++){
+    
+    vec3 q=p+positions[i];
+    
+    float a=angles[i];
+    q.xz*=mat2(cos(a),sin(a),-sin(a),cos(a));
+    a=iTime*2.-float(i*3);
+    q.xy*=mat2(cos(a),sin(a),-sin(a),cos(a));
+    
+    float an=sin(.5);
+    float an2=cos(.5);
+    vec2 c=vec2(sin(an),cos(an));
+    float dk=sdCappedTorus(q,c,.4,.0025);
+    if(dk<k){
+      k=dk;
+      j=mod(float(i),3.);
+    }
+    
+  }
+  
+  float d=length(p)-.5;
+  float y=.1;
+  if(k<d){
+    y=j+1.2;
+  }
+  
+  d=min(d,k);
+  return d;//vec2(d,y);
+}
+
 mat2 rotate(float theta) {
   float s = sin(theta), c = cos(theta);
   return mat2(c, -s, s, c);
@@ -52,7 +85,9 @@ float sdSphere(vec3 p, float r) {
 }
 
 float sdScene(vec3 p) {
-  return sdSphere(p, 1.0);
+  float d = sdSphere(p, 1.0);
+  d = min(sdArcs(p), d);
+  return d;
 }
 
 float rayMarch(vec3 ro, vec3 rd) {
@@ -170,7 +205,7 @@ export const Globe = () => {
       iTime: clock.current * 0.001,
       iFrame: clock.current,
       iResolution: [size, size],
-      iImageResolution: [100, 100],
+      iImageResolution: [190.5, 95.25],
       iMouse: [x.current, y.current],
       angles: [0, 0.5, 1.4, 2.9, 4.5, 0.8, 2, 1, 3, 5.5],
       positions: [
