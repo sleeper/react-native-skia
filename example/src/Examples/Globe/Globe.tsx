@@ -10,7 +10,6 @@ import {
   useTouchHandler,
   useValue,
   runDecay,
-  ColorShader,
   ImageShader,
 } from "@shopify/react-native-skia";
 
@@ -32,12 +31,15 @@ uniform vec3 positions[10];
 const int MAX_MARCHING_STEPS = 100;
 const float MIN_DIST = 0.0;
 const float MAX_DIST = 100.0;
-const float PRECISION = 0.001;
+const float PRECISION = 0.01;
 const float PI = 3.14159265359;
+
+const int SPHERE = 0;
+const int ARCS = 1;
 
 struct Hit {
   float d;
-  float4 color;
+  float3 color;
   int id;
 };
 
@@ -98,21 +100,23 @@ Hit minHit(Hit a, Hit b) {
 }
 
 Hit sdScene(vec3 p) {
-  Hit sphere = Hit(sdSphere(p, 1.0), vec4(0, 0, 0, 0), 0);
-  Hit arcs = Hit(sdArcs(p), vec4(0, 0, 1, 1), 1);
+  Hit sphere = Hit(sdSphere(p, 1.0), vec3(0, 1, 0), SPHERE);
+  Hit arcs = Hit(sdArcs(p), vec3(0.3, 0.6, 1), ARCS);
   Hit hit = minHit(sphere, arcs);
   return hit;
 }
 
-float rayMarch(vec3 ro, vec3 rd) {
+Hit rayMarch(vec3 ro, vec3 rd) {
   float depth = MIN_DIST;
+  Hit co;
   for (int i = 0; i < MAX_MARCHING_STEPS; i++) {
     vec3 p = ro + depth * rd;
-    float d = sdScene(p).d;
-    depth += d;
-    if (d < PRECISION || depth > MAX_DIST) break;
+    co = sdScene(p);
+    depth += co.d;
+    if (co.d < PRECISION || depth > MAX_DIST) break;
   }
-  return depth;
+  co.d = depth;
+  return co;
 }
 
 mat3 camera(vec3 cameraPos, vec3 lookAtPoint) {
@@ -132,18 +136,21 @@ half4 main(vec2 fragCoord) {
   ro.yz *= rotate(mix(-PI, PI, m.y));
   ro.xz *= rotate(mix(-PI, PI, m.x));
   vec3 rd = camera(ro, lp) * normalize(vec3(uv, -1)); // ray direction
-  float d = rayMarch(ro, rd);
-  vec3 p = ro + rd * d;
-  
-  vec2 polarUV = vec2(atan(p.x, p.z)/PI, p.y/2.) + 0.5;
-  polarUV.x -= iTime * 0.1;
-  half3 bufferB = image.eval(polarUV * iImageResolution).rgb;
-  half3 sphereColor = bufferB;
-  col = mix(col, sphereColor, step(d - MAX_DIST, 0.));
-  if (col == vec3(0, 0, 0)) {
+  Hit hit = rayMarch(ro, rd);  
+  if (hit.d > MAX_DIST) {
     return vec4(0, 0, 0, 0);
+  } else if (hit.id == SPHERE) {
+    float d = hit.d;
+    vec3 p = ro + rd * d;
+    vec2 polarUV = vec2(atan(p.x, p.z)/PI, p.y/2.) + 0.5;
+    polarUV.x -= iTime * 0.1;
+    half3 sphereColor = image.eval(polarUV * iImageResolution).rgb;
+    col = mix(col, sphereColor, step(d - MAX_DIST, 0.));
+    return vec4(col, 1.0);
+  } else if (hit.id == ARCS) {
+    return vec4(hit.color, 1);
   }
-  return vec4(col, 1.0);
+  return vec4(0, 0, 0, 0);
 }
 `;
 
