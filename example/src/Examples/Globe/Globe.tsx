@@ -35,6 +35,12 @@ const float MAX_DIST = 100.0;
 const float PRECISION = 0.001;
 const float PI = 3.14159265359;
 
+struct Hit {
+  float d;
+  float4 color;
+  int id;
+};
+
 float sdCappedTorus(in vec3 p,in vec2 sc,in float ra,in float rb)
 {
   p.x=abs(p.x);
@@ -84,64 +90,29 @@ float sdSphere(vec3 p, float r) {
   return length(p) - r;
 }
 
-float sdScene(vec3 p) {
-  float d = sdSphere(p, 1.0);
-  d = min(sdArcs(p), d);
-  return d;
+Hit minHit(Hit a, Hit b) {
+  if (a.d < b.d) {
+    return a;
+  }
+  return b;
+}
+
+Hit sdScene(vec3 p) {
+  Hit sphere = Hit(sdSphere(p, 1.0), vec4(0, 0, 0, 0), 0);
+  Hit arcs = Hit(sdArcs(p), vec4(0, 0, 1, 1), 1);
+  Hit hit = minHit(sphere, arcs);
+  return hit;
 }
 
 float rayMarch(vec3 ro, vec3 rd) {
   float depth = MIN_DIST;
   for (int i = 0; i < MAX_MARCHING_STEPS; i++) {
     vec3 p = ro + depth * rd;
-    float d = sdScene(p);
+    float d = sdScene(p).d;
     depth += d;
     if (d < PRECISION || depth > MAX_DIST) break;
   }
   return depth;
-}
-
-vec2 map(vec3 p){
-  float k=10000.;
-  float j=0.;
-  for(int i=0;i<3;i++){
-    
-    vec3 q=p+positions[i];
-    
-    float a=angles[i];
-    q.xz*=mat2(cos(a),sin(a),-sin(a),cos(a));
-    a=iTime*2.-float(i*3);
-    q.xy*=mat2(cos(a),sin(a),-sin(a),cos(a));
-    
-    float an=sin(.5);
-    float an2=cos(.5);
-    vec2 c=vec2(sin(an),cos(an));
-    float dk=sdCappedTorus(q,c,.4,.0025);
-    if(dk<k){
-      k=dk;
-      j=mod(float(i),3.);
-    }
-    
-  }
-  
-  float d=length(p)-.5;
-  float y=.1;
-  if(k<d){
-    y=j+1.2;
-  }
-  
-  d=min(d,k);
-  return vec2(d,y);
-}
-
-vec3 calcNormal(vec3 p) {
-    vec2 e = vec2(1.0, -1.0) * 0.0005;
-    float r = 2.;
-    return normalize(
-      e.xyy * sdScene(p + e.xyy) +
-      e.yyx * sdScene(p + e.yyx) +
-      e.yxy * sdScene(p + e.yxy) +
-      e.xxx * sdScene(p + e.xxx));
 }
 
 mat3 camera(vec3 cameraPos, vec3 lookAtPoint) {
