@@ -102,7 +102,11 @@ Hit minHit(Hit a, Hit b) {
 Hit sdScene(vec3 p) {
   Hit sphere = Hit(sdSphere(p, 1.0), vec3(0, 1, 0), SPHERE);
   Hit arcs = Hit(sdArcs(p), vec3(0.3, 0.6, 1), ARCS);
+  float an = 2.5*(0.5+0.5*sin(iTime*1.1+3.0));
+  vec2 c = vec2(sin(an),cos(an));
+  Hit test = Hit(sdCappedTorus(p, c, 0.4, 0.1), vec3(0, 0, 1), ARCS);
   Hit hit = minHit(sphere, arcs);
+  hit = minHit(hit, test);
   return hit;
 }
 
@@ -147,10 +151,9 @@ half4 main(vec2 fragCoord) {
     half3 sphereColor = image.eval(polarUV * iImageResolution).rgb;
     col = mix(col, sphereColor, step(d - MAX_DIST, 0.));
     return vec4(col, 1.0);
-  } else if (hit.id == ARCS) {
+  } else {
     return vec4(hit.color, 1);
   }
-  return vec4(0, 0, 0, 0);
 }
 `;
 
