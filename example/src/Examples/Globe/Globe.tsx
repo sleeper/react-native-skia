@@ -3,7 +3,6 @@ import { View } from "react-native";
 import {
   Canvas,
   Fill,
-  ImageShader,
   Shader,
   useClockValue,
   useComputedValue,
@@ -11,6 +10,8 @@ import {
   useTouchHandler,
   useValue,
   runDecay,
+  ColorShader,
+  ImageShader,
 } from "@shopify/react-native-skia";
 
 import { frag } from "./ShaderLib";
@@ -28,143 +29,117 @@ uniform float2 iMouse;
 uniform float angles[10];
 uniform vec3 positions[10];
 
-float sdCappedTorus(in vec3 p, in vec2 sc, in float ra, in float rb)
+const int MAX_MARCHING_STEPS = 255;
+const float MIN_DIST = 0.0;
+const float MAX_DIST = 100.0;
+const float PRECISION = 0.001;
+const float PI = 3.14159265359;
+
+float sdCappedTorus(in vec3 p,in vec2 sc,in float ra,in float rb)
 {
-  p.x = abs(p.x);
-  float k = (sc.y * p.x > sc.x * p.y) ? dot(p.xy, sc) : length(p.xy);
-  return sqrt(dot(p, p) + ra * ra - 2.0 * ra * k) - rb;
+  p.x=abs(p.x);
+  float k=(sc.y*p.x>sc.x*p.y)?dot(p.xy,sc):length(p.xy);
+  return sqrt(dot(p,p)+ra*ra-2.*ra*k)-rb;
 }
 
-vec2 map(vec3 p) {
-  float k = 10000.;
-  float j = 0.;
-  for (int i = 0; i < 3; i++) {
-    vec3 q = p + positions[i];
-
-    float a = angles[i];
-    q.xz *= mat2(cos(a), sin(a), -sin(a), cos(a));
-    a = iTime * 2. - float(i * 3);
-    q.xy *= mat2(cos(a), sin(a), -sin(a), cos(a));
-
-    float an = sin(0.5);
-    float an2 = cos(0.5);
-    vec2 c = vec2(sin(an), cos(an));
-    float dk = sdCappedTorus(q, c, 0.4, 0.0025);
-    if (dk < k) {
-      k = dk;
-      j = mod(float(i), 3.);
-    }
-  }
-
-  float d = length(p) - 0.5;
-  float y = 0.1;
-  if (k < d) {
-    y = j + 1.2;
-  }
-
-  d = min(d, k);
-  return vec2(d, y);
+mat2 rotate(float theta) {
+  float s = sin(theta), c = cos(theta);
+  return mat2(c, -s, s, c);
 }
 
-vec2 ray(vec3 ro, vec3 rd) {
-  float t;
-  vec2 h;
-  vec3 p;
-  for (int i = 0; i < 200; i++) {
-    p = ro + rd * t;
-    h = map(p);
-    if (h.x < 0.0001) break;
-    t += h.x;
-    if (t > 20.) break;
-  }
-  if (t > 20.) t = -1.;
-  return vec2(t, h.y);
+float sdSphere(vec3 p, float r) {
+  return length(p) - r;
 }
 
-vec3 calcNorm(vec3 p) {
-  const float eps = 0.0001;
-  vec4 n = vec4(0.0);
-  for (int i = 0; i < 4; i++)
-  {
-    vec4 s = vec4(p, 0.0);
-    s[i] += eps;
-    n[i] = map(s.xyz).x;
-  }
-  return normalize(n.xyz - n.w);
+float sdScene(vec3 p) {
+  return sdSphere(p, 1.0);
 }
 
-vec3 render(vec3 ro, vec3 rd) {
-  vec2 t = ray(ro, rd);
-  vec3 sk = vec3(1. - rd.y, 1. - rd.y, 1.);
-
-  vec3 p1 = ro + rd * t.x;
-
-  vec3 col = smoothstep(2.45, 2.5, length(p1)) * vec3(1.);
-  if (t.x > 0.0) {
-    vec3 p = ro + rd * t.x;
-    vec3 n = calcNorm(p);
-    if (t.y > 3.) {
-      col = vec3(0., 1., 0.);
-    }
-    else if (t.y > 2.) {
-      col = vec3(1., 1., 1.);
-    }
-    else if (t.y > 1.) {
-      col = vec3(1., 0., 0.);
-    }
-    else if (t.y > 0.) {
-      vec3 q = n;
-
-      vec3 sun = normalize(vec3(0.2, 5., 0.4));
-      vec3 r = reflect(-sun, n);
-      vec3 spec = pow(max(0.0, dot(r, -rd)), 32.) * vec3(1.);
-
-      vec2 longitudeLatitude = vec2(
-        (atan(q.y, q.x) / 3.1415926 + 1.0) * 0.5,
-        1.0 - acos(q.z) / 3.1415926);
-
-      float land = 1. - smoothstep(0.6, 0.4, image.eval(longitudeLatitude).y);
-      col = mix(vec3(0.5, 0.5, 1.) * 0.5, vec3(0.1, 0.9, 0.1), land) + spec * 0.7;
-    }
+float rayMarch(vec3 ro, vec3 rd) {
+  float depth = MIN_DIST;
+  for (int i = 0; i < MAX_MARCHING_STEPS; i++) {
+    vec3 p = ro + depth * rd;
+    float d = sdScene(p);
+    depth += d;
+    if (d < PRECISION || depth > MAX_DIST) break;
   }
-
-  return col;
+  return depth;
 }
 
-vec4 main(in vec2 fragCoord)
-{
-  vec2 uv = (2. * fragCoord - iResolution.xy) / iResolution.y;
-  float an_x = 10. * -iMouse.x / iResolution.x;
-  float an_y = 10. * -iMouse.y / iResolution.y;
-  //an_x=0.;
-  an_x += sin(iTime / 20.) / 5. - 0.45;
-  vec3 ta = vec3(0.0, 0.0, 0.0);
-  float off = 1.5;
-  vec3 ro = ta + vec3(sin(an_x) * off, 0.0, cos(an_x) * off);
-  vec3 ww = normalize(ta - ro);
-  vec3 uu = normalize(cross(ww, vec3(0.0, 1.0, 0.0)));
-  vec3 vv = normalize(cross(uu, ww));
-  vec3 rd = normalize(uv.x * uu + uv.y * vv + 1.5 * ww);
-  vec3 col = render(ro, rd);
+vec2 map(vec3 p){
+  float k=10000.;
+  float j=0.;
+  for(int i=0;i<3;i++){
+    
+    vec3 q=p+positions[i];
+    
+    float a=angles[i];
+    q.xz*=mat2(cos(a),sin(a),-sin(a),cos(a));
+    a=iTime*2.-float(i*3);
+    q.xy*=mat2(cos(a),sin(a),-sin(a),cos(a));
+    
+    float an=sin(.5);
+    float an2=cos(.5);
+    vec2 c=vec2(sin(an),cos(an));
+    float dk=sdCappedTorus(q,c,.4,.0025);
+    if(dk<k){
+      k=dk;
+      j=mod(float(i),3.);
+    }
+    
+  }
+  
+  float d=length(p)-.5;
+  float y=.1;
+  if(k<d){
+    y=j+1.2;
+  }
+  
+  d=min(d,k);
+  return vec2(d,y);
+}
+
+vec3 calcNormal(vec3 p) {
+    vec2 e = vec2(1.0, -1.0) * 0.0005;
+    float r = 2.;
+    return normalize(
+      e.xyy * sdScene(p + e.xyy) +
+      e.yyx * sdScene(p + e.yyx) +
+      e.yxy * sdScene(p + e.yxy) +
+      e.xxx * sdScene(p + e.xxx));
+}
+
+mat3 camera(vec3 cameraPos, vec3 lookAtPoint) {
+	vec3 cd = normalize(lookAtPoint - cameraPos); // camera direction
+	vec3 cr = normalize(cross(vec3(0, 1, 0), cd)); // camera right
+	vec3 cu = normalize(cross(cd, cr)); // camera up
+	return mat3(-cr, cu, -cd);
+}
+
+half4 main(vec2 fragCoord) {
+  vec2 uv = (fragCoord-.5*iResolution.xy)/iResolution.y;
+  vec2 m = iMouse.xy/iResolution.xy;
+  half3 col = vec3(0, 0, 0);
+  
+  vec3 lp = vec3(0); // lookat point (aka camera target)
+  vec3 ro = vec3(0, 0, 3); // ray origin that represents camera position
+  ro.yz *= rotate(mix(-PI, PI, m.y));
+  ro.xz *= rotate(mix(-PI, PI, m.x));
+  vec3 rd = camera(ro, lp) * normalize(vec3(uv, -1)); // ray direction
+  float d = rayMarch(ro, rd);
+  vec3 p = ro + rd * d;
+  
+  vec2 polarUV = vec2(atan(p.x, p.z)/PI, p.y/2.) + 0.5;
+  polarUV.x -= iTime * 0.1;
+  half3 bufferB = image.eval(polarUV * iImageResolution).rgb;
+  half3 sphereColor = bufferB;
+  col = mix(col, sphereColor, step(d - MAX_DIST, 0.));
+  if (col == vec3(0, 0, 0)) {
+    return vec4(0, 0, 0, 0);
+  }
   return vec4(col, 1.0);
 }
-
 `;
-
-const arcColorStart = "#7629ed";
-const arcColorEnd = "#CB6BED";
-const arcsData = [
-  {
-    start: {
-      lat: 29.85587,
-      long: -95.4136,
-    },
-    end: {
-      lat: 34.05648,
-      long: -115.29487,
-    },
-  },
-];
 
 export const Globe = () => {
   const size = 375;
@@ -195,7 +170,7 @@ export const Globe = () => {
       iTime: clock.current * 0.001,
       iFrame: clock.current,
       iResolution: [size, size],
-      iImageResolution: [earth?.width() ?? 0, earth?.height() ?? 0],
+      iImageResolution: [100, 100],
       iMouse: [x.current, y.current],
       angles: [0, 0.5, 1.4, 2.9, 4.5, 0.8, 2, 1, 3, 5.5],
       positions: [
@@ -234,7 +209,16 @@ export const Globe = () => {
       >
         <Fill>
           <Shader source={source} uniforms={uniforms}>
-            <ImageShader image={earth} tx="repeat" ty="repeat" />
+            <ImageShader
+              image={earth}
+              tx="repeat"
+              ty="repeat"
+              fit="cover"
+              x={0}
+              y={0}
+              width={100}
+              height={100}
+            />
           </Shader>
         </Fill>
       </Canvas>
