@@ -27,7 +27,7 @@ describe("Text", () => {
     expect(result).toBe(64);
   });
   it("Should draw text along a circle", async () => {
-    const font = fonts.RobotoMedium;
+    const font = fonts.UberMoveMedium;
     const { Skia } = importSkia();
     const path = Skia.Path.Make();
     const r = surface.width / 2;
@@ -44,7 +44,7 @@ describe("Text", () => {
   });
 
   it("Should draw text along a path", async () => {
-    const font = fonts.NotoSansSCRegular;
+    const font = fonts.UberMoveMedium;
     const { Skia } = importSkia();
     const path = Skia.Path.Make();
     const r = surface.width / 2;

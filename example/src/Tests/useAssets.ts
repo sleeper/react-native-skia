@@ -30,6 +30,10 @@ export const useAssets = () => {
     require("./assets/NotoSansSC-Regular.otf"),
     errorHandler
   );
+  const UberMoveMedium = useTypeface(
+    require("./assets/UberMove-Medium_mono.ttf"),
+    errorHandler
+  );
   if (error) {
     throw new Error("Failed to load assets: " + error.message);
   }
@@ -38,6 +42,7 @@ export const useAssets = () => {
     !oslo ||
     !NotoColorEmoji ||
     !NotoSansSCRegular ||
+    !UberMoveMedium ||
     !skiaLogoJpeg ||
     !skiaLogoPng
   ) {
@@ -47,6 +52,7 @@ export const useAssets = () => {
     RobotoMedium,
     NotoColorEmoji,
     NotoSansSCRegular,
+    UberMoveMedium,
     oslo,
     skiaLogoJpeg,
     skiaLogoPng,

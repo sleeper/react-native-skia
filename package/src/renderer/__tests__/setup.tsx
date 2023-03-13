@@ -38,6 +38,7 @@ export let fonts: {
   RobotoMedium: SkFont;
   NotoColorEmoji: SkFont;
   NotoSansSCRegular: SkFont;
+  UberMoveMedium: SkFont;
 };
 
 beforeAll(async () => {
@@ -59,15 +60,20 @@ beforeAll(async () => {
     "skia/__tests__/assets/Roboto-Medium.ttf",
     fontSize
   );
+  const UberMoveMedium = loadFont(
+    "skia/__tests__/assets/UberMove-Medium_mono.ttf",
+    fontSize
+  );
   const oslo = loadImage("skia/__tests__/assets/oslo.jpg");
   const skiaLogoPng = loadImage("skia/__tests__/assets/skia_logo.png");
   const skiaLogoJpeg = loadImage("skia/__tests__/assets/skia_logo_jpeg.jpg");
   images = { oslo, skiaLogoPng, skiaLogoJpeg };
-  fonts = { RobotoMedium, NotoColorEmoji, NotoSansSCRegular };
+  fonts = { RobotoMedium, NotoColorEmoji, NotoSansSCRegular, UberMoveMedium };
   assets.set(oslo, "oslo");
   assets.set(RobotoMedium, "RobotoMedium");
   assets.set(NotoColorEmoji, "NotoColorEmoji");
   assets.set(NotoSansSCRegular, "NotoSansSCRegular");
+  assets.set(UberMoveMedium, "UberMoveMedium");
   assets.set(skiaLogoPng, "skiaLogoPng");
   assets.set(skiaLogoJpeg, "skiaLogoJpeg");
 });
