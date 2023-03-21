@@ -19,6 +19,7 @@
     "@react-navigation/native-stack": "6.9.0",
     "@shopify/react-native-skia": "link:../package/",
     "@svgr/webpack": "^6.2.1",
+    "alea": "^1.0.1",
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
     "cdt2d": "^1.0.0",
     "color": "^4.2.1",
@@ -31,7 +32,7 @@
     "react-native-safe-area-context": "4.3.4",
     "react-native-screens": "3.17.0",
     "react-native-web": "^0.18.0",
-    "simplex-noise": "^3.0.1"
+    "simplex-noise": "^4.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

@@ -15,7 +15,8 @@ import {
   useComputedValue,
 } from "@shopify/react-native-skia";
 import { useWindowDimensions } from "react-native";
-import SimplexNoise from "simplex-noise";
+import { createNoise2D } from "simplex-noise";
+import alea from "alea";
 
 import { symmetric } from "./Math";
 import { Cubic } from "./Cubic";
@@ -140,29 +141,29 @@ export const CoonsPatchMeshGradient = ({
       if (isEdge(pt.pos, window)) {
         return pt;
       }
-      const noisePos = new SimplexNoise(`${i}-pos`);
-      const noiseC1 = new SimplexNoise(`${i}-c1`);
-      const noiseC2 = new SimplexNoise(`${i}-c2`);
+      const noisePos = createNoise2D(alea(`${i}-pos`));
+      const noiseC1 = createNoise2D(alea(`${i}-c1`));
+      const noiseC2 = createNoise2D(alea(`${i}-c2`));
       return {
         pos: add(
           pt.pos,
           vec(
-            A * noisePos.noise2D(clock.current / F, 0),
-            A * noisePos.noise2D(0, clock.current / F)
+            A * noisePos(clock.current / F, 0),
+            A * noisePos(0, clock.current / F)
           )
         ),
         c1: add(
           pt.c1,
           vec(
-            A * noiseC1.noise2D(clock.current / F, 0),
-            A * noiseC1.noise2D(0, clock.current / F)
+            A * noiseC1(clock.current / F, 0),
+            A * noiseC1(0, clock.current / F)
           )
         ),
         c2: add(
           pt.c1,
           vec(
-            A * noiseC2.noise2D(clock.current / F, 0),
-            A * noiseC2.noise2D(0, clock.current / F)
+            A * noiseC2(clock.current / F, 0),
+            A * noiseC2(0, clock.current / F)
           )
         ),
       };

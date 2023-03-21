@@ -30,6 +30,7 @@ import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
 import type { StackParamList } from "./types";
 import { useAssets } from "./Tests/useAssets";
+import { JoyOfPainting } from "./Examples/JoyOfPainting";
 
 const linking: LinkingOptions<StackParamList> = {
   config: {
@@ -150,6 +151,13 @@ const App = () => {
           <Stack.Screen
             name="Wallpaper"
             component={Wallpaper}
+            options={{
+              header: () => null,
+            }}
+          />
+          <Stack.Screen
+            name="JoyOfPainting"
+            component={JoyOfPainting}
             options={{
               header: () => null,
             }}

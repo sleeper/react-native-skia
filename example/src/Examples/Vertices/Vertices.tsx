@@ -11,7 +11,8 @@ import {
   isEdge,
 } from "@shopify/react-native-skia";
 import cdt2d from "cdt2d";
-import SimplexNoise from "simplex-noise";
+import { createNoise2D } from "simplex-noise";
+import alea from "alea";
 
 import "./cdt2d.d";
 
@@ -58,10 +59,10 @@ export const Demo = () => {
         if (isEdge(vertex, window)) {
           return vertex;
         }
-        const noise = new SimplexNoise(i);
+        const noise = createNoise2D(alea(i));
         return {
-          x: vertex.x + AX * noise.noise2D(clock.current / F, 0),
-          y: vertex.y + AY * noise.noise2D(0, clock.current / F),
+          x: vertex.x + AX * noise(clock.current / F, 0),
+          y: vertex.y + AY * noise(0, clock.current / F),
         };
       }),
     [clock]
