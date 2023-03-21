@@ -1,5 +1,7 @@
 import type { SkRect } from "@shopify/react-native-skia";
 import {
+  PointLitSpecular,
+  Skia,
   BlurMask,
   Circle,
   SumPathEffect,
@@ -40,9 +42,11 @@ const Cloud = ({ rct, flip = false }: CloudProps) => {
 
 export const Sun = () => {
   return (
-    <Circle color="#F9E3A4" r={150} c={vec(350, 200)}>
-      <BlurMask blur={25} style="solid" />
-    </Circle>
+    <>
+      <Circle color="#F9E3A4" r={125} c={vec(350, 200)}>
+        <BlurMask blur={20} style="solid" />
+      </Circle>
+    </>
   );
 };
 

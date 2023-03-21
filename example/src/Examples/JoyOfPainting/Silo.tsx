@@ -1,5 +1,13 @@
 /* eslint-disable max-len */
-import { fitbox, Group, Path, rect } from "@shopify/react-native-skia";
+import {
+  fitbox,
+  Group,
+  Path,
+  rect,
+  Skia,
+  PointLitSpecular,
+  Fill,
+} from "@shopify/react-native-skia";
 import React from "react";
 import { useWindowDimensions } from "react-native";
 
@@ -56,6 +64,22 @@ export const Silo = () => {
         path="m238.689.772 32.375 63.162v970.636h-20.396V753.134h-11.979V.772Z"
         color="#A9CAD8"
       />
+      <Fill
+        clip={
+          Skia.Path.MakeFromSVGString(
+            "m238.689.772 32.375 63.162v970.636h-20.396V753.134h-11.979V.772Z"
+          )!
+        }
+        color="#A9CAD8"
+      >
+        <PointLitSpecular
+          location={Skia.Point3(350, 200, 1000)}
+          color="#F9E3A4"
+          surfaceScale={1}
+          ks={0.5}
+          shininess={50}
+        />
+      </Fill>
       <Path
         path="M271.064 1034.57h51.331v146.55h21.92v162.24H.021v-308.79h271.043Z"
         color="#607F89"

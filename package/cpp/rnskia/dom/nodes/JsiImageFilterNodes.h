@@ -6,6 +6,7 @@
 #include "JsiSkRuntimeEffect.h"
 
 #include "NodeProp.h"
+#include "PointProp.h"
 #include "RadiusProp.h"
 #include "TileModeProp.h"
 #include "UniformsProp.h"
@@ -44,6 +45,53 @@ protected:
 
     context->getImageFilters()->push(imgf);
   }
+};
+
+class JsiPointLitSpecularImageFilterNode
+    : public JsiBaseImageFilterNode,
+      public JsiDomNodeCtor<JsiPointLitSpecularImageFilterNode> {
+public:
+  explicit JsiPointLitSpecularImageFilterNode(
+      std::shared_ptr<RNSkPlatformContext> context)
+      : JsiBaseImageFilterNode(context, "skPointLitSpecularImageFilter") {}
+
+  void decorate(DeclarationContext *context) override {
+    auto location = *_locationProp->getDerivedValue();
+    auto color = *_colorProp->getDerivedValue();
+    auto sc = _sc->value().getAsNumber();
+    auto ks = _ks->value().getAsNumber();
+    auto shininess = _shininess->value().getAsNumber();
+    auto input = context->getImageFilters()->pop();
+
+    composeAndPush(context, SkImageFilters::PointLitSpecular(
+                                location, color, sc, ks, shininess, input));
+  }
+
+protected:
+  void defineProperties(NodePropsContainer *container) override {
+    JsiDomDeclarationNode::defineProperties(container);
+    _locationProp = container->defineProperty<Point3Prop>("location");
+    _locationProp->require();
+
+    _colorProp = container->defineProperty<ColorProp>("color");
+    _colorProp->require();
+
+    _sc = container->defineProperty<NodeProp>("surfaceScale");
+    _sc->require();
+
+    _ks = container->defineProperty<NodeProp>("ks");
+    _ks->require();
+
+    _shininess = container->defineProperty<NodeProp>("shininess");
+    _shininess->require();
+  }
+
+private:
+  Point3Prop *_locationProp;
+  ColorProp *_colorProp;
+  NodeProp *_sc;
+  NodeProp *_ks;
+  NodeProp *_shininess;
 };
 
 class JsiBlendImageFilterNode : public JsiBaseImageFilterNode,

@@ -4,3 +4,4 @@ export * from "./DisplacementMap";
 export * from "./Shadow";
 export * from "./Morphology";
 export * from "./RuntimeShader";
+export * from "./PointLitSpecular";

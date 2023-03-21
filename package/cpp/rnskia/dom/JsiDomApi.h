@@ -100,10 +100,12 @@ public:
                     JsiLine2DPathEffectNode::createCtor(context));
     installFunction("SumPathEffectNode",
                     JsiSumPathEffectNode::createCtor(context));
-
-    // Image filters
     installFunction("DashPathEffectNode",
                     JsiBlendImageFilterNode::createCtor(context));
+
+    // Image filters
+    installFunction("PointLitSpecularImageFilterNode",
+                    JsiPointLitSpecularImageFilterNode::createCtor(context));
     installFunction("DropShadowImageFilterNode",
                     JsiDropShadowImageFilterNode::createCtor(context));
     installFunction("DisplacementMapImageFilterNode",
