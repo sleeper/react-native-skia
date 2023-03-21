@@ -22,6 +22,23 @@ namespace jsi = facebook::jsi;
 
 class JsiSkImageFilterFactory : public JsiSkHostObject {
 public:
+  JSI_HOST_FUNCTION(PointLitSpecular) {
+    auto location = JsiSkPoint3::fromValue(runtime, arguments[0]);
+    auto color = JsiSkColor::fromValue(runtime, arguments[1]);
+    auto surfaceScale = arguments[2].asNumber();
+    auto ks = arguments[3].asNumber();
+    auto shininess = arguments[4].asNumber();
+    sk_sp<SkImageFilter> imageFilter;
+    if (!arguments[5].isNull()) {
+      imageFilter = JsiSkImageFilter::fromValue(runtime, arguments[5]);
+    }
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkImageFilter>(
+                     getContext(), SkImageFilters::PointLitSpecular(
+                                       *location, color, surfaceScale, ks,
+                                       shininess, imageFilter)));
+  }
+
   JSI_HOST_FUNCTION(MakeBlur) {
     float sigmaX = arguments[0].asNumber();
     float sigmaY = arguments[1].asNumber();

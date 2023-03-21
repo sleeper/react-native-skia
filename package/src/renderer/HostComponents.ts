@@ -55,6 +55,7 @@ import type { ChildrenProps } from "../dom/types/Common";
 import type {
   BlendProps,
   MorphologyImageFilterProps,
+  PointLitSpecularImageFilterProps,
 } from "../dom/types/ImageFilters";
 import type { SkRect, SkRRect } from "../skia/types";
 import type { JsiDrawingNode } from "../dom/nodes/DrawingNode";
@@ -117,6 +118,9 @@ declare global {
     SumPathEffectNode: () => DeclarationNode<null>;
 
     // Image filters
+    PointLitSpecularImageFilterNode: (
+      props: PointLitSpecularImageFilterProps
+    ) => DeclarationNode<PointLitSpecularImageFilterProps>;
     BlendImageFilterNode: (
       props: BlendImageFilterProps
     ) => DeclarationNode<BlendImageFilterProps>;
@@ -230,6 +234,7 @@ declare global {
       skDisplacementMapImageFilter: SkiaProps<DisplacementMapImageFilterProps>;
       skRuntimeShaderImageFilter: SkiaProps<RuntimeShaderImageFilterProps>;
       skMorphologyImageFilter: SkiaProps<MorphologyImageFilterProps>;
+      skPointLitSpecularImageFilter: SkiaProps<PointLitSpecularImageFilterProps>;
 
       // ColorFilters
       skMatrixColorFilter: SkiaProps<MatrixColorFilterProps>;
@@ -325,6 +330,8 @@ export const createNode = (
     case NodeType.BlurMaskFilter:
       return Sk.BlurMaskFilter(props);
     // Image Filter
+    case NodeType.PointLitSpecularImageFilter:
+      return Sk.PointLitSpecularImageFilter(props);
     case NodeType.BlendImageFilter:
       return Sk.BlendImageFilter(props);
     case NodeType.BlurImageFilter:

@@ -13,6 +13,7 @@ import type {
   DropShadowImageFilterProps,
   MorphologyImageFilterProps,
   OffsetImageFilterProps,
+  PointLitSpecularImageFilterProps,
   RuntimeShaderImageFilterProps,
 } from "../../types";
 import { DeclarationType, NodeType } from "../../types";
@@ -163,6 +164,25 @@ export class DropShadowImageFilterNode extends ImageFilterDeclaration<DropShadow
 export enum MorphologyOperator {
   Erode,
   Dilate,
+}
+
+export class PointLitSpecularImageFilterNode extends ImageFilterDeclaration<PointLitSpecularImageFilterProps> {
+  constructor(ctx: NodeContext, props: PointLitSpecularImageFilterProps) {
+    super(ctx, NodeType.MorphologyImageFilter, props);
+  }
+
+  decorate(ctx: DeclarationContext) {
+    const { location, color, surfaceScale, ks, shininess } = this.props;
+    const img = this.Skia.ImageFilter.PointLitSpecular(
+      location,
+      this.Skia.Color(color),
+      surfaceScale,
+      ks,
+      shininess,
+      this.input(ctx)
+    );
+    this.composeAndPush(ctx, img);
+  }
 }
 
 export class MorphologyImageFilterNode extends ImageFilterDeclaration<MorphologyImageFilterProps> {

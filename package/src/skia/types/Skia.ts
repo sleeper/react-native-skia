@@ -16,7 +16,7 @@ import type {
 import type { ShaderFactory } from "./Shader";
 import type { SkMatrix } from "./Matrix";
 import type { PathEffectFactory } from "./PathEffect";
-import type { SkPoint } from "./Point";
+import type { SkPoint, SkPoint3 } from "./Point";
 import type { SkVertices, VertexMode } from "./Vertices/Vertices";
 import type { DataFactory } from "./Data";
 import type { SVGFactory } from "./SVG";
@@ -33,6 +33,7 @@ import type { Color, SkColor } from "./Color";
  */
 export interface Skia {
   Point: (x: number, y: number) => SkPoint;
+  Point3: (x: number, y: number, z: number) => SkPoint3;
   XYWHRect: (x: number, y: number, width: number, height: number) => SkRect;
   RuntimeShaderBuilder: (rt: SkRuntimeEffect) => SkRuntimeShaderBuilder;
   RRectXY: (rect: SkRect, rx: number, ry: number) => SkRRect;

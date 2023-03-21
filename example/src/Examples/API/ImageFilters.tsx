@@ -24,8 +24,8 @@ const DisplacementMapDemo = () => {
   }
   return (
     <Group>
-      <DisplacementMap channelX="r" channelY="a" scale={20}>
-        <Turbulence freqX={0.01} freqY={0.05} octaves={2} />
+      <DisplacementMap channelX="r" channelY="a" scale={10}>
+        <Turbulence freqX={0.01} freqY={0.05} octaves={4} />
       </DisplacementMap>
       <Image image={image} x={0} y={0} width={256} height={256} fit="cover" />
     </Group>

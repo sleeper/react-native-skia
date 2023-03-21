@@ -46,6 +46,7 @@ import type {
   DisplacementMapImageFilterProps,
   DropShadowImageFilterProps,
   MorphologyImageFilterProps,
+  PointLitSpecularImageFilterProps,
   RuntimeShaderImageFilterProps,
 } from "../types/ImageFilters";
 import type {
@@ -117,7 +118,10 @@ import {
   FractalNoiseNode,
   ColorNode,
 } from "./paint/Shaders";
-import { MorphologyImageFilterNode } from "./paint/ImageFilters";
+import {
+  MorphologyImageFilterNode,
+  PointLitSpecularImageFilterNode,
+} from "./paint/ImageFilters";
 import { GroupNode } from "./GroupNode";
 import { PaintNode } from "./PaintNode";
 import type { NodeContext } from "./Node";
@@ -267,6 +271,13 @@ export class JsiSkDOM implements SkDOM {
   }
 
   // ImageFilters
+  PointLitSpecularImageFilter(props: PointLitSpecularImageFilterProps) {
+    return global.SkiaDomApi &&
+      global.SkiaDomApi.PointLitSpecularImageFilterNode
+      ? global.SkiaDomApi.PointLitSpecularImageFilterNode(props)
+      : new PointLitSpecularImageFilterNode(this.ctx, props);
+  }
+
   BlendImageFilter(props: BlendImageFilterProps) {
     return global.SkiaDomApi && global.SkiaDomApi.BlendImageFilterNode
       ? global.SkiaDomApi.BlendImageFilterNode(props)

@@ -37,6 +37,7 @@ export const enum NodeType {
   BlurImageFilter = "skBlurImageFilter",
   DropShadowImageFilter = "skDropShadowImageFilter",
   MorphologyImageFilter = "skMorphologyImageFilter",
+  PointLitSpecularImageFilter = "skPointLitSpecularImageFilter",
   BlendImageFilter = "skBlendImageFilter",
   RuntimeShaderImageFilter = "skRuntimeShaderImageFilter",
 

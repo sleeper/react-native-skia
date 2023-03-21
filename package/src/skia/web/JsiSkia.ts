@@ -10,7 +10,7 @@ import type {
   SkTypeface,
 } from "../types";
 
-import { JsiSkPoint } from "./JsiSkPoint";
+import { JsiSkPoint, JsiSkPoint3 } from "./JsiSkPoint";
 import { JsiSkPaint } from "./JsiSkPaint";
 import { JsiSkRect } from "./JsiSkRect";
 import { Color } from "./JsiSkColor";
@@ -41,6 +41,8 @@ import { JsiSkTypeface } from "./JsiSkTypeface";
 export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   Point: (x: number, y: number) =>
     new JsiSkPoint(CanvasKit, Float32Array.of(x, y)),
+  Point3: (x: number, y: number, z: number) =>
+    new JsiSkPoint3(CanvasKit, Float32Array.of(x, y, z)),
   RuntimeShaderBuilder: (_: SkRuntimeEffect): SkRuntimeShaderBuilder => {
     throw new Error("Not implemented on React Native Web");
   },

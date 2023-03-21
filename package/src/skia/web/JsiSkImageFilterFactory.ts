@@ -11,6 +11,7 @@ import type {
   SkRuntimeShaderBuilder,
   SkShader,
   TileMode,
+  SkPoint3,
 } from "../types";
 
 import { Host, NotImplementedOnRNWeb, ckEnum } from "./Host";
@@ -23,6 +24,26 @@ export class JsiSkImageFilterFactory
 {
   constructor(CanvasKit: CanvasKit) {
     super(CanvasKit);
+  }
+
+  /**
+   * Create a filter that calculates the specular illumination from a point light source,
+   * using alpha channel of the input as the height profile of the surface (to approximate normal vectors).
+   *
+   *
+   * @param input - if null, it will use the dynamic source image
+   */
+  PointLitSpecular(
+    _location: SkPoint3,
+    _lightColor: SkColor,
+    _surfaceScale: number,
+    _ks: number,
+    _shininess: number,
+    _input: SkImageFilter | null
+  ): SkImageFilter {
+    throw new NotImplementedOnRNWeb(
+      "PointLitSpecular is not yet supported on React Native Web."
+    );
   }
 
   MakeOffset(dx: number, dy: number, input: SkImageFilter | null) {

@@ -8,6 +8,7 @@ import type {
   DisplacementMapImageFilterProps,
   MorphologyImageFilterProps,
   BlendProps,
+  PointLitSpecularImageFilterProps,
 } from "./ImageFilters";
 import type { DeclarationNode, RenderNode } from "./Node";
 import type {
@@ -100,6 +101,9 @@ export interface SkDOM {
   ): DeclarationNode<BlurMaskFilterProps>;
 
   // ImageFilters
+  PointLitSpecularImageFilter(
+    props: PointLitSpecularImageFilterProps
+  ): ImageFilterNode<PointLitSpecularImageFilterProps>;
   BlendImageFilter(
     props: BlendImageFilterProps
   ): ImageFilterNode<BlendImageFilterProps>;

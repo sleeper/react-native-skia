@@ -6,6 +6,7 @@ import type {
   TileMode,
   Uniforms,
 } from "../../skia/types";
+import type { SkPoint3 } from "../../skia/types/Point";
 
 import type { Radius, SkEnum, ChildrenProps } from "./Common";
 
@@ -31,6 +32,14 @@ export interface BlendImageFilterProps extends ChildrenProps {
 export interface MorphologyImageFilterProps extends ChildrenProps {
   operator: "erode" | "dilate";
   radius: Radius;
+}
+
+export interface PointLitSpecularImageFilterProps extends ChildrenProps {
+  location: SkPoint3;
+  color: Color;
+  surfaceScale: number;
+  ks: number;
+  shininess: number;
 }
 
 export interface DropShadowImageFilterProps extends ChildrenProps {

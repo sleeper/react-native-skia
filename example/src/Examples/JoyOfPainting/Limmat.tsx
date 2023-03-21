@@ -1,17 +1,23 @@
 import {
+  BlurMask,
   center,
+  Circle,
   CornerPathEffect,
   DiscretePathEffect,
+  DisplacementMap,
+  Fill,
   Group,
   Oval,
   Path,
   rect,
   Skia,
+  Turbulence,
+  vec,
 } from "@shopify/react-native-skia";
 import { useWindowDimensions } from "react-native";
 
 export const Limmat = () => {
-  const { height } = useWindowDimensions();
+  const { height, width } = useWindowDimensions();
 
   const path = Skia.Path.Make();
   path.addRect(rect(125, height * 0.5, 200, 600));
@@ -34,6 +40,16 @@ export const Limmat = () => {
           <CornerPathEffect r={75} />
           <DiscretePathEffect length={50} deviation={75} />
         </Path>
+        <Circle
+          color="#F9E3A4"
+          opacity={0.2}
+          r={150}
+          c={vec(width / 2, height - 300)}
+        >
+          <DisplacementMap channelX="r" channelY="g" scale={50}>
+            <Turbulence freqX={0.005} freqY={0.1} octaves={4} />
+          </DisplacementMap>
+        </Circle>
       </Group>
     </>
   );

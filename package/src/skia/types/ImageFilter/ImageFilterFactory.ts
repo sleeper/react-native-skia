@@ -1,6 +1,7 @@
 import type { SkColor } from "../Color";
 import type { SkColorFilter } from "../ColorFilter/ColorFilter";
 import type { BlendMode } from "../Paint";
+import type { SkPoint3 } from "../Point";
 import type { SkRect } from "../Rect";
 import type { SkRuntimeShaderBuilder } from "../RuntimeEffect";
 import type { SkShader } from "../Shader";
@@ -15,6 +16,22 @@ export enum ColorChannel {
 }
 
 export interface ImageFilterFactory {
+  /**
+   * Create a filter that calculates the specular illumination from a point light source,
+   * using alpha channel of the input as the height profile of the surface (to approximate normal vectors).
+   *
+   *
+   * @param input - if null, it will use the dynamic source image
+   */
+  PointLitSpecular(
+    location: SkPoint3,
+    lightColor: SkColor,
+    surfaceScale: number,
+    ks: number,
+    shininess: number,
+    input: SkImageFilter | null
+  ): SkImageFilter;
+
   /**
    * Offsets the input image
    *
