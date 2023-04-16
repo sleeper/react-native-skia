@@ -10,6 +10,8 @@
 #include "JsiSkImage.h"
 #include "JsiSkImageInfo.h"
 
+#include <GrRecordingContext.h>
+
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
@@ -38,8 +40,26 @@ public:
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
 
+
+  JSI_HOST_FUNCTION(MakeImageFromGPUSurface) {
+    auto surface = arguments[0].asObject(runtime)
+        .asHostObject<JsiSkWrappingSkPtrHostObject<SkSurface>>(runtime)
+        ->getObject();
+	GrRecordingContext* context = surface->recordingContext();
+    auto backendTexture = surface->getBackendTexture(SkSurface::kFlushRead_TextureHandleAccess);
+    if (context == nullptr) {
+	  // This only works with GPU contextes
+	  // TODO: return error?
+      return jsi::Value::null();
+    }
+    auto image = SkImage::MakeFromAdoptedTexture(context, backendTexture, kTopLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType, kOpaque_SkAlphaType);
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromEncoded),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage), )
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage),
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromGPUSurface), )
 
   explicit JsiSkImageFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

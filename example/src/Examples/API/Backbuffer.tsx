@@ -27,7 +27,7 @@ half4 main(vec2 fragCoord)
 }`;
 
 const { width, height } = Dimensions.get("window");
-const offscreen = Skia.Surface.Make(width, height)!;
+const offscreen = Skia.Surface.MakeOffscreen(width, height)!;
 
 export const Backbuffer = () => {
   const backbuffer = useRef<SkShader>(
@@ -53,14 +53,14 @@ export const Backbuffer = () => {
     offscreen.getCanvas().drawPaint(paint);
 
     // 2. Swap
-    backbuffer.current = offscreen
-      .makeImageSnapshot()
-      .makeShaderOptions(
-        TileMode.Decal,
-        TileMode.Decal,
-        FilterMode.Nearest,
-        MipmapMode.None
-      );
+    backbuffer.current = Skia.Image.MakeImageFromGPUSurface(
+      offscreen
+    )!.makeShaderOptions(
+      TileMode.Decal,
+      TileMode.Decal,
+      FilterMode.Nearest,
+      MipmapMode.None
+    );
 
     // 3. Draw Result
     const frontPaint = Skia.Paint();

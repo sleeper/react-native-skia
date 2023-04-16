@@ -1,4 +1,5 @@
 import type { SkData } from "../Data";
+import type { SkSurface } from "../Surface";
 
 import type { SkImage } from "./Image";
 
@@ -74,4 +75,6 @@ export interface ImageFactory {
    * @param bytesPerRow
    */
   MakeImage(info: ImageInfo, data: SkData, bytesPerRow: number): SkImage | null;
+
+  MakeImageFromGPUSurface(surface: SkSurface): SkImage | null;
 }

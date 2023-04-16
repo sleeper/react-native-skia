@@ -1,9 +1,9 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
-import type { SkData, ImageInfo } from "../types";
+import type { SkData, ImageInfo, SkSurface, SkImage } from "../types";
 import type { ImageFactory } from "../types/Image/ImageFactory";
 
-import { Host, ckEnum } from "./Host";
+import { Host, NotImplementedOnRNWeb, ckEnum } from "./Host";
 import { JsiSkImage } from "./JsiSkImage";
 import { JsiSkData } from "./JsiSkData";
 
@@ -39,5 +39,9 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
       return null;
     }
     return new JsiSkImage(this.CanvasKit, image);
+  }
+
+  MakeImageFromGPUSurface(_: SkSurface): SkImage | null {
+    throw new NotImplementedOnRNWeb();
   }
 }
