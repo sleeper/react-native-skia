@@ -1,34 +1,47 @@
 import React, { createContext, useContext, useMemo } from "react";
 import { View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import type { SkSVG } from "@shopify/react-native-skia";
-import { Canvas, ImageSVG, useSVG } from "@shopify/react-native-skia";
+import type { SkPicture } from "@shopify/react-native-skia";
+import { SkiaPictureView, Skia, useSVG } from "@shopify/react-native-skia";
 
-const useLoadSVGs = () => {
-  const github = useSVG(require("./assets/icons8-github.svg"));
-  const octocat = useSVG(require("./assets/icons8-octocat.svg"));
-  const stackExchange = useSVG(require("./assets/icons8-stack-exchange.svg"));
-  const overflow = useSVG(require("./assets/icons8-stack-overflow.svg"));
-  const assets = useMemo(() => {
-    if (github && octocat && stackExchange && overflow) {
-      return {
-        github,
-        octocat,
-        stackExchange,
-        overflow,
-      };
-    } else {
+const useSVGPicture = (module: number) => {
+  const svg = useSVG(module);
+  return useMemo(() => {
+    if (!svg) {
       return null;
     }
-  }, [github, octocat, overflow, stackExchange]);
-  return assets;
+    const recorder = Skia.PictureRecorder();
+    const canvas = recorder.beginRecording(Skia.XYWHRect(0, 0, 48, 48));
+    canvas.drawSvg(svg);
+    console.log("finishRecordingAsPicture");
+    return recorder.finishRecordingAsPicture();
+  }, [svg]);
+};
+
+const useLoadSVGs = () => {
+  const github = useSVGPicture(require("./assets/icons8-github.svg"));
+  const octocat = useSVGPicture(require("./assets/icons8-octocat.svg"));
+  const stackExchange = useSVGPicture(
+    require("./assets/icons8-stack-exchange.svg")
+  );
+  const overflow = useSVGPicture(require("./assets/icons8-stack-overflow.svg"));
+  if (github && octocat && stackExchange && overflow) {
+    return {
+      github,
+      octocat,
+      stackExchange,
+      overflow,
+    };
+  } else {
+    return null;
+  }
 };
 
 interface SVGAssets {
-  github: SkSVG;
-  octocat: SkSVG;
-  stackExchange: SkSVG;
-  overflow: SkSVG;
+  github: SkPicture;
+  octocat: SkPicture;
+  stackExchange: SkPicture;
+  overflow: SkPicture;
 }
 
 const SVGContext = createContext<SVGAssets | null>(null);
@@ -42,15 +55,13 @@ const useSVGs = () => {
 };
 
 interface IconProps {
-  icon: SkSVG;
+  icon: SkPicture;
   size?: number;
 }
 
-const Icon = ({ icon, size = 50 }: IconProps) => {
+const Icon = ({ icon, size = 48 }: IconProps) => {
   return (
-    <Canvas style={{ width: size, height: size }}>
-      <ImageSVG svg={icon} />
-    </Canvas>
+    <SkiaPictureView picture={icon} style={{ width: size, height: size }} />
   );
 };
 
