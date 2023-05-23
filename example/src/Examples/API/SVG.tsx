@@ -1,8 +1,28 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useMemo } from "react";
 import { View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import type { SkSVG } from "@shopify/react-native-skia";
 import { Canvas, ImageSVG, useSVG } from "@shopify/react-native-skia";
+
+const useLoadSVGs = () => {
+  const github = useSVG(require("./assets/icons8-github.svg"));
+  const octocat = useSVG(require("./assets/icons8-octocat.svg"));
+  const stackExchange = useSVG(require("./assets/icons8-stack-exchange.svg"));
+  const overflow = useSVG(require("./assets/icons8-stack-overflow.svg"));
+  const assets = useMemo(() => {
+    if (github && octocat && stackExchange && overflow) {
+      return {
+        github,
+        octocat,
+        stackExchange,
+        overflow,
+      };
+    } else {
+      return null;
+    }
+  }, [github, octocat, overflow, stackExchange]);
+  return assets;
+};
 
 interface SVGAssets {
   github: SkSVG;
@@ -62,15 +82,12 @@ const SettingsScreen = () => {
 const Tab = createBottomTabNavigator();
 
 export const SVG = () => {
-  const github = useSVG(require("./assets/icons8-github.svg"));
-  const octocat = useSVG(require("./assets/icons8-octocat.svg"));
-  const stackExchange = useSVG(require("./assets/icons8-stack-exchange.svg"));
-  const overflow = useSVG(require("./assets/icons8-stack-overflow.svg"));
-  if (!github || !octocat || !stackExchange || !overflow) {
+  const assets = useLoadSVGs();
+  if (!assets) {
     return null;
   }
   return (
-    <SVGContext.Provider value={{ github, octocat, stackExchange, overflow }}>
+    <SVGContext.Provider value={assets}>
       <Tab.Navigator>
         <Tab.Screen name="Home" component={HomeScreen} />
         <Tab.Screen name="Settings" component={SettingsScreen} />
