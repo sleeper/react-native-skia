@@ -3,6 +3,7 @@
 #include "JniSkiaDrawView.h"
 #include "JniSkiaManager.h"
 #include "JniSkiaPictureView.h"
+#include "JniSkiaPictureView2.h"
 #include <fbjni/fbjni.h>
 #include <jni.h>
 
@@ -11,6 +12,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *) {
     RNSkia::JniSkiaManager::registerNatives();
     RNSkia::JniSkiaDrawView::registerNatives();
     RNSkia::JniSkiaPictureView::registerNatives();
+    RNSkia::JniSkiaPictureView2::registerNatives();
     RNSkia::JniSkiaDomView::registerNatives();
     RNSkia::JniPlatformContext::registerNatives();
   });

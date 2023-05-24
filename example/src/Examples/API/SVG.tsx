@@ -2,7 +2,9 @@ import React, { createContext, useContext, useMemo } from "react";
 import { View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import type { SkPicture } from "@shopify/react-native-skia";
-import { SkiaPictureView, Skia, useSVG } from "@shopify/react-native-skia";
+import { Skia, useSVG } from "@shopify/react-native-skia";
+
+import { SkiaPictureView2 } from "./SkiaPictureView2";
 
 const useSVGPicture = (module: number) => {
   const svg = useSVG(module);
@@ -61,7 +63,10 @@ interface IconProps {
 
 const Icon = ({ icon, size = 48 }: IconProps) => {
   return (
-    <SkiaPictureView picture={icon} style={{ width: size, height: size }} />
+    <SkiaPictureView2
+      picture={icon}
+      style={{ width: size, height: size, backgroundColor: "red" }}
+    />
   );
 };
 
