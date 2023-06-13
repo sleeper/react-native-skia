@@ -2,6 +2,7 @@
 
 #import "RNSkPlatformContext.h"
 #import "RNSkView.h"
+#import "SkiaContext.h"
 
 #import <MetalKit/MetalKit.h>
 #import <QuartzCore/CAMetalLayer.h>

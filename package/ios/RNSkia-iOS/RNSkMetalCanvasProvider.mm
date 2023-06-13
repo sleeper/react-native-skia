@@ -1,5 +1,6 @@
 #import <RNSkLog.h>
 #import <RNSkMetalCanvasProvider.h>
+#import "SkiaContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -18,8 +19,6 @@ RNSkMetalCanvasProvider::getMetalRenderContext() {
   auto threadId = std::this_thread::get_id();
   if (renderContexts.count(threadId) == 0) {
     auto drawingContext = std::make_shared<MetalRenderContext>();
-    drawingContext->commandQueue = nullptr;
-    drawingContext->skContext = nullptr;
     renderContexts.emplace(threadId, drawingContext);
   }
   return renderContexts.at(threadId);
@@ -34,10 +33,11 @@ RNSkMetalCanvasProvider::RNSkMetalCanvasProvider(
   _layer = [CAMetalLayer layer];
 #pragma clang diagnostic pop
 
-  auto device = MTLCreateSystemDefaultDevice();
+  // Fetch shared SkiaContext
+  SkiaContext* skiaContext = [SkiaContext sharedContext];
 
   _layer.framebufferOnly = NO;
-  _layer.device = device;
+  _layer.device = skiaContext.mtlDevice; // Set the device to the shared one from SkiaContext
   _layer.opaque = false;
   _layer.contentsScale = _context->getPixelDensity();
   _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
@@ -89,12 +89,11 @@ void RNSkMetalCanvasProvider::renderToCanvas(
   // Get render context for current thread
   auto renderContext = getMetalRenderContext();
 
+  // If the Skia context is not set in the renderContext, use the one from the shared SkiaContext
   if (renderContext->skContext == nullptr) {
-    auto device = MTLCreateSystemDefaultDevice();
-    renderContext->commandQueue =
-        id<MTLCommandQueue>(CFRetain((GrMTLHandle)[device newCommandQueue]));
-    renderContext->skContext = GrDirectContext::MakeMetal(
-        (__bridge void *)device, (__bridge void *)renderContext->commandQueue);
+    SkiaContext* skiaContext = [SkiaContext sharedContext];
+    renderContext->commandQueue = skiaContext.mtlCommandQueue;
+    renderContext->skContext = skiaContext.grContext;
   }
 
   // Wrap in auto release pool since we want the system to clean up after
@@ -142,7 +141,7 @@ void RNSkMetalCanvasProvider::renderToCanvas(
     [commandBuffer presentDrawable:currentDrawable];
     [commandBuffer commit];
   }
-};
+}
 
 void RNSkMetalCanvasProvider::setSize(int width, int height) {
   _width = width;
