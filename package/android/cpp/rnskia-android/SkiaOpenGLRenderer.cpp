@@ -197,8 +197,8 @@ void SkiaOpenGLRenderer::run(const std::function<void(SkCanvas *)> &cb,
 
 bool SkiaOpenGLRenderer::ensureInitialised() {
   // Set up static OpenGL context
-  if (!initStaticGLContext()) {
-    return false;
+  if (getThreadDrawingContext()->skContext != nullptr) {
+    return true;
   }
 
   // Set up OpenGL Surface
