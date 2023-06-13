@@ -15,6 +15,8 @@ import {
   mix,
 } from "@shopify/react-native-skia";
 
+import { ExportableCanvas } from "../../components/ExportableCanvas";
+
 const c1 = "#61bea2";
 const c2 = "#529ca0";
 
@@ -70,7 +72,7 @@ export const Breathe = () => {
   );
 
   return (
-    <Canvas style={styles.container} debug>
+    <ExportableCanvas style={styles.container} debug>
       <Fill color="rgb(36,43,56)" />
       <Group origin={center} transform={transform} blendMode="screen">
         <BlurMask style="solid" blur={40} />
@@ -78,7 +80,7 @@ export const Breathe = () => {
           return <Ring key={index} index={index} progress={progress} />;
         })}
       </Group>
-    </Canvas>
+    </ExportableCanvas>
   );
 };
 

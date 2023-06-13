@@ -44,6 +44,7 @@ add_library(
         "${PROJECT_SOURCE_DIR}/cpp/jni/JniSkiaManager.cpp"
 
         "${PROJECT_SOURCE_DIR}/cpp/jni/JniPlatformContext.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/SkiaContext.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/RNSkOpenGLCanvasProvider.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/SkiaOpenGLRenderer.cpp"
 

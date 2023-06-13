@@ -75,8 +75,7 @@ sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height) {
   glGetIntegerv(GL_SAMPLES, &samples);
 
   // Create the Skia backend context
-  auto backendInterface = GrGLMakeNativeInterface();
-  auto grContext = GrDirectContext::MakeGL(backendInterface);
+  auto grContext = SkiaContext::getInstance().getGrContext();
   if (grContext == nullptr) {
     RNSkLogger::logToConsole("GrDirectContext::MakeGL failed");
     return nullptr;
@@ -281,10 +280,8 @@ bool SkiaOpenGLRenderer::initStaticSkiaContext() {
     return true;
   }
 
-  // Create the Skia backend context
-  auto backendInterface = GrGLMakeNativeInterface();
-  getThreadDrawingContext()->skContext =
-      GrDirectContext::MakeGL(backendInterface);
+  // Create the Skia backend context using SkiaContext
+  getThreadDrawingContext()->skContext = SkiaContext::getInstance().getGrContext();
   if (getThreadDrawingContext()->skContext == nullptr) {
     RNSkLogger::logToConsole("GrDirectContext::MakeGL failed");
     return false;
