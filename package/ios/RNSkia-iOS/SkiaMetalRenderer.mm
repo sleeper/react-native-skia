@@ -10,19 +10,13 @@
 #pragma clang diagnostic pop
 
 #import <MetalKit/MetalKit.h>
+#import "SkiaContext.h"
 
 struct OffscreenRenderContext {
-  id<MTLDevice> device;
-  id<MTLCommandQueue> commandQueue;
-  sk_sp<GrDirectContext> skiaContext;
   id<MTLTexture> texture;
 
   OffscreenRenderContext(int width, int height) {
-    device = MTLCreateSystemDefaultDevice();
-    commandQueue =
-        id<MTLCommandQueue>(CFRetain((GrMTLHandle)[device newCommandQueue]));
-    skiaContext = GrDirectContext::MakeMetal((__bridge void *)device,
-                                             (__bridge void *)commandQueue);
+    SkiaContext* skiaContext = [SkiaContext sharedContext];
     // Create a Metal texture descriptor
     MTLTextureDescriptor *textureDescriptor = [MTLTextureDescriptor
         texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
@@ -31,7 +25,7 @@ struct OffscreenRenderContext {
                                  mipmapped:NO];
     textureDescriptor.usage =
         MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead;
-    texture = [device newTextureWithDescriptor:textureDescriptor];
+    texture = [skiaContext.mtlDevice newTextureWithDescriptor:textureDescriptor];
   }
 };
 
@@ -44,8 +38,9 @@ sk_sp<SkSurface> MakeOffscreenMetalSurface(int width, int height) {
   GrBackendTexture backendTexture(width, height, GrMipMapped::kNo, info);
 
   // Create a SkSurface from the GrBackendTexture
+  SkiaContext* skiaContext = [SkiaContext sharedContext];
   auto surface = SkSurface::MakeFromBackendTexture(
-      ctx->skiaContext.get(), backendTexture, kTopLeft_GrSurfaceOrigin, 0,
+      skiaContext.grContext.get(), backendTexture, kTopLeft_GrSurfaceOrigin, 0,
       kBGRA_8888_SkColorType, nullptr, nullptr,
       [](void *addr) { delete (OffscreenRenderContext *)addr; }, ctx);
 
