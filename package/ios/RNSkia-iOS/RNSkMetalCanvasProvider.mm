@@ -1,6 +1,6 @@
+#import "SkiaContext.h"
 #import <RNSkLog.h>
 #import <RNSkMetalCanvasProvider.h>
-#import "SkiaContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -34,10 +34,12 @@ RNSkMetalCanvasProvider::RNSkMetalCanvasProvider(
 #pragma clang diagnostic pop
 
   // Fetch shared SkiaContext
-  SkiaContext* skiaContext = [SkiaContext sharedContext];
+  SkiaContext *skiaContext = [SkiaContext sharedContext];
 
   _layer.framebufferOnly = NO;
-  _layer.device = skiaContext.mtlDevice; // Set the device to the shared one from SkiaContext
+  _layer.device =
+      skiaContext
+          .mtlDevice; // Set the device to the shared one from SkiaContext
   _layer.opaque = false;
   _layer.contentsScale = _context->getPixelDensity();
   _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
@@ -89,9 +91,10 @@ void RNSkMetalCanvasProvider::renderToCanvas(
   // Get render context for current thread
   auto renderContext = getMetalRenderContext();
 
-  // If the Skia context is not set in the renderContext, use the one from the shared SkiaContext
+  // If the Skia context is not set in the renderContext, use the one from the
+  // shared SkiaContext
   if (renderContext->skContext == nullptr) {
-    SkiaContext* skiaContext = [SkiaContext sharedContext];
+    SkiaContext *skiaContext = [SkiaContext sharedContext];
     renderContext->commandQueue = skiaContext.mtlCommandQueue;
     renderContext->skContext = skiaContext.grContext;
   }

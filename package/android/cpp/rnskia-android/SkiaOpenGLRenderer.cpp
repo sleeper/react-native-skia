@@ -281,7 +281,8 @@ bool SkiaOpenGLRenderer::initStaticSkiaContext() {
   }
 
   // Create the Skia backend context using SkiaContext
-  getThreadDrawingContext()->skContext = SkiaContext::getInstance().getGrContext();
+  getThreadDrawingContext()->skContext =
+      SkiaContext::getInstance().getGrContext();
   if (getThreadDrawingContext()->skContext == nullptr) {
     RNSkLogger::logToConsole("GrDirectContext::MakeGL failed");
     return false;
