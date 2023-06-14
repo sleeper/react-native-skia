@@ -3,56 +3,113 @@
 #include <RNSkLog.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
-#include "SkiaContext.h"
 
 namespace RNSkia {
 /** Static members */
 sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height) {
-    SkiaContext &skiaContext = SkiaContext::getInstance();
+  EGLDisplay eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+  if (eglDisplay == EGL_NO_DISPLAY) {
+    RNSkLogger::logToConsole("eglGetdisplay failed : %i", glGetError());
+    return nullptr;
+  }
 
-    // Create the Skia backend context
-    auto grContext = skiaContext.getGrContext();
-    if (grContext == nullptr) {
-        RNSkLogger::logToConsole("GrDirectContext::MakeGL failed");
-        return nullptr;
-    }
-    auto maxSamples =
-        grContext->maxSurfaceSampleCountForColorType(kRGBA_8888_SkColorType);
+  EGLint major;
+  EGLint minor;
+  if (!eglInitialize(eglDisplay, &major, &minor)) {
+    RNSkLogger::logToConsole("eglInitialize failed : %i", glGetError());
+    return nullptr;
+  }
 
-    GLint samples;
-    glGetIntegerv(GL_SAMPLES, &samples);
-    if (samples > maxSamples)
-        samples = maxSamples;
+  EGLint att[] = {EGL_RENDERABLE_TYPE,
+                  EGL_OPENGL_ES2_BIT,
+                  EGL_SURFACE_TYPE,
+                  EGL_PBUFFER_BIT,
+                  EGL_ALPHA_SIZE,
+                  8,
+                  EGL_BLUE_SIZE,
+                  8,
+                  EGL_GREEN_SIZE,
+                  8,
+                  EGL_RED_SIZE,
+                  8,
+                  EGL_DEPTH_SIZE,
+                  0,
+                  EGL_STENCIL_SIZE,
+                  0,
+                  EGL_NONE};
 
-    GLint buffer;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &buffer);
+  EGLint numConfigs;
+  EGLConfig eglConfig;
+  eglConfig = 0;
+  if (!eglChooseConfig(eglDisplay, att, &eglConfig, 1, &numConfigs) ||
+      numConfigs == 0) {
+    RNSkLogger::logToConsole("Failed to choose a config %d\n", eglGetError());
+    return nullptr;
+  }
 
-    GLint stencil;
-    glGetIntegerv(GL_STENCIL_BITS, &stencil);
+  EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
 
-    GrGLFramebufferInfo fbInfo;
-    fbInfo.fFBOID = buffer;
-    fbInfo.fFormat = 0x8058; // This should match the color format of your pbuffer
+  EGLContext eglContext =
+      eglCreateContext(eglDisplay, eglConfig, NULL, contextAttribs);
 
-    auto renderTarget =
-        GrBackendRenderTarget(width, height, samples, stencil, fbInfo);
+  if (eglContext == EGL_NO_CONTEXT) {
+    RNSkLogger::logToConsole("eglCreateContext failed: %d\n", eglGetError());
+    return nullptr;
+  }
 
-    struct OffscreenRenderContext {
-        EGLDisplay display;
-        EGLSurface surface;
-    };
-    auto ctx = new OffscreenRenderContext({skiaContext.getDisplay(), skiaContext.getSurface()});
+  const EGLint offScreenSurfaceAttribs[] = {EGL_WIDTH, width, EGL_HEIGHT,
+                                            height, EGL_NONE};
+  EGLSurface eglSurface =
+      eglCreatePbufferSurface(eglDisplay, eglConfig, offScreenSurfaceAttribs);
+  if (!eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext)) {
+    RNSkLogger::logToConsole("eglMakeCurrent failed: %d\n", eglGetError());
+    return nullptr;
+  }
+  GLint buffer;
+  glGetIntegerv(GL_FRAMEBUFFER_BINDING, &buffer);
 
-    auto surface = SkSurface::MakeFromBackendRenderTarget(
-        grContext.get(), renderTarget, kBottomLeft_GrSurfaceOrigin,
-        kRGBA_8888_SkColorType, nullptr, nullptr,
-        [](void *addr) {
-            auto ctx = reinterpret_cast<OffscreenRenderContext *>(addr);
-            eglDestroySurface(ctx->display, ctx->surface);
-            delete ctx;
-        },
-        reinterpret_cast<void *>(ctx));
-    return surface;
+  GLint stencil;
+  glGetIntegerv(GL_STENCIL_BITS, &stencil);
+
+  GLint samples;
+  glGetIntegerv(GL_SAMPLES, &samples);
+
+  // Create the Skia backend context
+  auto backendInterface = GrGLMakeNativeInterface();
+  auto grContext = GrDirectContext::MakeGL(backendInterface);
+  if (grContext == nullptr) {
+    RNSkLogger::logToConsole("GrDirectContext::MakeGL failed");
+    return nullptr;
+  }
+  auto maxSamples =
+      grContext->maxSurfaceSampleCountForColorType(kRGBA_8888_SkColorType);
+
+  if (samples > maxSamples)
+    samples = maxSamples;
+
+  GrGLFramebufferInfo fbInfo;
+  fbInfo.fFBOID = buffer;
+  fbInfo.fFormat = 0x8058;
+
+  auto renderTarget =
+      GrBackendRenderTarget(width, height, samples, stencil, fbInfo);
+
+  struct OffscreenRenderContext {
+    EGLDisplay display;
+    EGLSurface surface;
+  };
+  auto ctx = new OffscreenRenderContext({eglDisplay, eglSurface});
+
+  auto surface = SkSurface::MakeFromBackendRenderTarget(
+      grContext.get(), renderTarget, kBottomLeft_GrSurfaceOrigin,
+      kRGBA_8888_SkColorType, nullptr, nullptr,
+      [](void *addr) {
+        auto ctx = reinterpret_cast<OffscreenRenderContext *>(addr);
+        eglDestroySurface(ctx->display, ctx->surface);
+        delete ctx;
+      },
+      reinterpret_cast<void *>(ctx));
+  return surface;
 }
 
 std::shared_ptr<OpenGLDrawingContext>
@@ -225,9 +282,9 @@ bool SkiaOpenGLRenderer::initStaticSkiaContext() {
   }
 
   // Create the Skia backend context
-  auto grContext = SkiaContext::getInstance().getGrContext();
   auto backendInterface = GrGLMakeNativeInterface();
-  getThreadDrawingContext()->skContext = grContext;
+  getThreadDrawingContext()->skContext =
+      GrDirectContext::MakeGL(backendInterface);
   if (getThreadDrawingContext()->skContext == nullptr) {
     RNSkLogger::logToConsole("GrDirectContext::MakeGL failed");
     return false;
