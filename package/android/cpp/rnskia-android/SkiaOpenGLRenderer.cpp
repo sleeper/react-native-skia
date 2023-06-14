@@ -4,6 +4,8 @@
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 
+#include "SkiaContext.h"
+
 namespace RNSkia {
 /** Static members */
 sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height) {

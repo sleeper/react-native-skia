@@ -3,10 +3,12 @@
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/gl/GrGLInterface.h"
 
+namespace RNSkia {
+
 class SkiaContext {
 public:
   static SkiaContext &getInstance();
-  GrDirectContext *getGrContext() const;
+  sk_sp<GrDirectContext> getGrContext() const;
 
 private:
   SkiaContext();
@@ -18,3 +20,5 @@ private:
   sk_sp<const GrGLInterface> fBackendContext;
   sk_sp<GrDirectContext> fGrContext;
 };
+
+}

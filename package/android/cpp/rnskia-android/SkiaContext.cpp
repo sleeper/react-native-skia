@@ -1,5 +1,7 @@
 #include "SkiaContext.h"
 
+namespace RNSkia {
+
 SkiaContext::SkiaContext() {
   fBackendContext = GrGLMakeNativeInterface();
   if (fBackendContext) {
@@ -20,4 +22,6 @@ SkiaContext &SkiaContext::getInstance() {
   return instance;
 }
 
-GrDirectContext *SkiaContext::getGrContext() const { return fGrContext.get(); }
+sk_sp<GrDirectContext> SkiaContext::getGrContext() const { return fGrContext; }
+
+}
