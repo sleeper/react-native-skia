@@ -3,6 +3,7 @@
 #include <RNSkLog.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
+#include "SkiaContext.h"
 
 namespace RNSkia {
 /** Static members */
@@ -75,8 +76,7 @@ sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height) {
   glGetIntegerv(GL_SAMPLES, &samples);
 
   // Create the Skia backend context
-  auto backendInterface = GrGLMakeNativeInterface();
-  auto grContext = GrDirectContext::MakeGL(backendInterface);
+  auto grContext = SkiaContext::getInstance().getGrContext();
   if (grContext == nullptr) {
     RNSkLogger::logToConsole("GrDirectContext::MakeGL failed");
     return nullptr;
