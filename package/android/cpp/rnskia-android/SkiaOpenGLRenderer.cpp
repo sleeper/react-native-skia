@@ -4,8 +4,6 @@
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 
-#include "SkiaContext.h"
-
 namespace RNSkia {
 /** Static members */
 sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height) {
@@ -77,7 +75,8 @@ sk_sp<SkSurface> MakeOffscreenGLSurface(int width, int height) {
   glGetIntegerv(GL_SAMPLES, &samples);
 
   // Create the Skia backend context
-  auto grContext = SkiaContext::getInstance().getGrContext();
+  auto backendInterface = GrGLMakeNativeInterface();
+  auto grContext = GrDirectContext::MakeGL(backendInterface);
   if (grContext == nullptr) {
     RNSkLogger::logToConsole("GrDirectContext::MakeGL failed");
     return nullptr;
@@ -199,8 +198,8 @@ void SkiaOpenGLRenderer::run(const std::function<void(SkCanvas *)> &cb,
 
 bool SkiaOpenGLRenderer::ensureInitialised() {
   // Set up static OpenGL context
-  if (getThreadDrawingContext()->skContext != nullptr) {
-    return true;
+  if (!initStaticGLContext()) {
+    return false;
   }
 
   // Set up OpenGL Surface
@@ -282,9 +281,10 @@ bool SkiaOpenGLRenderer::initStaticSkiaContext() {
     return true;
   }
 
-  // Create the Skia backend context using SkiaContext
+  // Create the Skia backend context
+  auto backendInterface = GrGLMakeNativeInterface();
   getThreadDrawingContext()->skContext =
-      SkiaContext::getInstance().getGrContext();
+      GrDirectContext::MakeGL(backendInterface);
   if (getThreadDrawingContext()->skContext == nullptr) {
     RNSkLogger::logToConsole("GrDirectContext::MakeGL failed");
     return false;
