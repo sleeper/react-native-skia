@@ -12,7 +12,6 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "SkFontMgr.h"
-#include "include/ports/SkFontMgr_data.h"
 
 #pragma clang diagnostic pop
 
@@ -43,10 +42,7 @@ public:
       // Populate each skdata
       skdatas[i] = std::move(data);
     }
-
-    // Create font manager
-    sk_sp<SkFontMgr> fontManager =
-        SkFontMgr_New_Custom_Data(SkSpan(skdatas.get(), size));
+	auto fontManager = context->getCustomFontMgr(SkSpan(skdatas.get(), size));
 
     // Return JSI wrapper for the font manager
     // This assumes a corresponding JsiSkFontMgr host object exists

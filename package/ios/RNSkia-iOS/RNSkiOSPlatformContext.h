@@ -65,6 +65,8 @@ public:
   void raiseError(const std::exception &err) override;
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override;
   sk_sp<SkFontMgr> getFontMgr() override;
+  sk_sp<SkFontMgr> getCustomFontMgr(SkSpan<sk_sp<SkData>> span) override;
+
 
   void willInvalidateModules() {
     // We need to do some house-cleaning here!

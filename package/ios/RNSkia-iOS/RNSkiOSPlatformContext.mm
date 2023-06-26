@@ -6,9 +6,12 @@
 
 #include <SkiaMetalRenderer.h>
 
+#include <CoreText/CoreText.h>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#include "SkData.h"
 #include "SkFontMgr.h"
 #include "SkSurface.h"
 
@@ -63,6 +66,36 @@ void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
 sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
                                                               int height) {
   return MakeOffscreenMetalSurface(width, height);
+}
+
+sk_sp<SkFontMgr> RNSkiOSPlatformContext::getCustomFontMgr(SkSpan<sk_sp<SkData>> span) {
+  // Initialize an array to hold the font descriptors.
+  CFMutableArrayRef fontDescriptors = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
+  
+  // Create a font descriptor for each SkData and add it to the array.
+  for (int i = 0; i < span.size(); ++i) {
+	CFDataRef data = CFDataCreate(kCFAllocatorDefault, (const UInt8*)span[i]->data(), span[i]->size());
+	if (data) {
+	  CFArrayRef descriptors = CTFontManagerCreateFontDescriptorsFromData(data);
+	  if (descriptors) {
+		CFArrayAppendArray(fontDescriptors, descriptors, CFRangeMake(0, CFArrayGetCount(descriptors)));
+		CFRelease(descriptors);
+	  }
+	  CFRelease(data);
+	}
+  }
+  
+  // Create the font collection.
+  CTFontCollectionRef fontCollection = CTFontCollectionCreateWithFontDescriptors(fontDescriptors, NULL);
+
+  // Create an SkFontMgr using the font collection.
+  sk_sp<SkFontMgr> fontMgr = SkFontMgr_New_CoreText(fontCollection);
+  
+  // Clean up.
+  CFRelease(fontDescriptors);
+  CFRelease(fontCollection);
+  
+  return fontMgr;
 }
 
 sk_sp<SkFontMgr> RNSkiOSPlatformContext::getFontMgr() {

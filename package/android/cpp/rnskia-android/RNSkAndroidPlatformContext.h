@@ -13,6 +13,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "include/ports/SkFontMgr_android.h"
+#include "include/ports/SkFontMgr_data.h"
 
 #pragma clang diagnostic pop
 
@@ -46,6 +47,10 @@ public:
 
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override {
     return MakeOffscreenGLSurface(width, height);
+  }
+
+  sk_sp<SkFontMgr> getCustomFontMgr(SkSpan<sk_sp<SkData>> span) override {
+     return SkFontMgr_New_Custom_Data(span);
   }
 
   sk_sp<SkFontMgr> getFontMgr() override {

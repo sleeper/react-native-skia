@@ -14,6 +14,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#include "SkSpan.h"
 #include "SkData.h"
 #include "SkFontMgr.h"
 #include "SkImage.h"
@@ -137,6 +138,11 @@ public:
    * Return the Platform specific font manager
    */
   virtual sk_sp<SkFontMgr> getFontMgr() = 0;
+
+  /**
+   * Return the a custom font manager
+   */
+  virtual sk_sp<SkFontMgr> getCustomFontMgr(SkSpan<sk_sp<SkData>> span) = 0;
 
   /**
    * Creates an skImage containing the screenshot of a native view and its
