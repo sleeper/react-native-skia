@@ -50,7 +50,7 @@ public:
   }
 
   sk_sp<SkFontMgr> getCustomFontMgr(SkSpan<sk_sp<SkData>> span) override {
-     return SkFontMgr_New_Custom_Data(span);
+    return SkFontMgr_New_Custom_Data(span);
   }
 
   sk_sp<SkFontMgr> getFontMgr() override {

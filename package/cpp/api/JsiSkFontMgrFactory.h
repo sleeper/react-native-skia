@@ -42,7 +42,7 @@ public:
       // Populate each skdata
       skdatas[i] = std::move(data);
     }
-	auto fontManager = context->getCustomFontMgr(SkSpan(skdatas.get(), size));
+    auto fontManager = context->getCustomFontMgr(SkSpan(skdatas.get(), size));
 
     // Return JSI wrapper for the font manager
     // This assumes a corresponding JsiSkFontMgr host object exists

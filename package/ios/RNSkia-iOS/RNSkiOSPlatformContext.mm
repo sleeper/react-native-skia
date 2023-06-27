@@ -15,6 +15,7 @@
 #include "SkFontMgr.h"
 #include "SkSurface.h"
 
+#include "include/ports/SkCFObject.h"
 #include "include/ports/SkFontMgr_mac_ct.h"
 
 #pragma clang diagnostic pop
@@ -68,33 +69,40 @@ sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
   return MakeOffscreenMetalSurface(width, height);
 }
 
-sk_sp<SkFontMgr> RNSkiOSPlatformContext::getCustomFontMgr(SkSpan<sk_sp<SkData>> span) {
+sk_sp<SkFontMgr>
+RNSkiOSPlatformContext::getCustomFontMgr(SkSpan<sk_sp<SkData>> span) {
   // Initialize an array to hold the font descriptors.
-  CFMutableArrayRef fontDescriptors = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
-  
+  sk_cfp<CFMutableArrayRef> fontDescriptors = sk_cfp<CFMutableArrayRef>(
+      CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks));
+
   // Create a font descriptor for each SkData and add it to the array.
   for (int i = 0; i < span.size(); ++i) {
-	CFDataRef data = CFDataCreate(kCFAllocatorDefault, (const UInt8*)span[i]->data(), span[i]->size());
-	if (data) {
-	  CFArrayRef descriptors = CTFontManagerCreateFontDescriptorsFromData(data);
-	  if (descriptors) {
-		CFArrayAppendArray(fontDescriptors, descriptors, CFRangeMake(0, CFArrayGetCount(descriptors)));
-		CFRelease(descriptors);
-	  }
-	  CFRelease(data);
-	}
+    sk_cfp<CFDataRef> data = sk_cfp<CFDataRef>(CFDataCreate(
+        kCFAllocatorDefault, (const UInt8 *)span[i]->data(), span[i]->size()));
+    if (data) {
+      sk_cfp<CFArrayRef> descriptors = sk_cfp<CFArrayRef>(
+          CTFontManagerCreateFontDescriptorsFromData(data.get()));
+      if (descriptors) {
+        CFArrayAppendArray(fontDescriptors.get(), descriptors.get(),
+                           CFRangeMake(0, CFArrayGetCount(descriptors.get())));
+      }
+    }
   }
-  
-  // Create the font collection.
-  CTFontCollectionRef fontCollection = CTFontCollectionCreateWithFontDescriptors(fontDescriptors, NULL);
 
+  // Create the font collection.
+  sk_cfp<CTFontCollectionRef> fontCollection = sk_cfp<CTFontCollectionRef>(
+      CTFontCollectionCreateWithFontDescriptors(fontDescriptors.get(), NULL));
+
+  // If CTFontCollectionCreateMatchingFontDescriptors returns a non-null value,
+  // the collection is valid
+  sk_cfp<CFArrayRef> matchingDescriptors = sk_cfp<CFArrayRef>(
+      CTFontCollectionCreateMatchingFontDescriptors(fontCollection.get()));
+  if (!matchingDescriptors.get()) {
+    return nullptr;
+  }
   // Create an SkFontMgr using the font collection.
-  sk_sp<SkFontMgr> fontMgr = SkFontMgr_New_CoreText(fontCollection);
-  
-  // Clean up.
-  CFRelease(fontDescriptors);
-  CFRelease(fontCollection);
-  
+  sk_sp<SkFontMgr> fontMgr = SkFontMgr_New_CoreText(fontCollection.get());
+
   return fontMgr;
 }
 

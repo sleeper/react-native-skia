@@ -14,10 +14,10 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkSpan.h"
 #include "SkData.h"
 #include "SkFontMgr.h"
 #include "SkImage.h"
+#include "SkSpan.h"
 #include "SkStream.h"
 #include "SkSurface.h"
 

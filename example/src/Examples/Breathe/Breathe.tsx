@@ -1,89 +1,46 @@
-import React, { useMemo } from "react";
-import { StyleSheet, useWindowDimensions } from "react-native";
-import type { SkiaValue } from "@shopify/react-native-skia";
 import {
-  useComputedValue,
-  useLoop,
-  BlurMask,
-  vec,
   Canvas,
-  Circle,
-  Fill,
-  Group,
-  polar2Canvas,
-  Easing,
-  mix,
+  Line,
+  Oval,
+  Path,
+  Skia,
+  vec,
 } from "@shopify/react-native-skia";
-
-const c1 = "#61bea2";
-const c2 = "#529ca0";
-
-interface RingProps {
-  index: number;
-  progress: SkiaValue<number>;
-}
-
-const Ring = ({ index, progress }: RingProps) => {
-  const { width, height } = useWindowDimensions();
-  const R = width / 4;
-  const center = useMemo(
-    () => vec(width / 2, height / 2 - 64),
-    [height, width]
-  );
-
-  const theta = (index * (2 * Math.PI)) / 6;
-  const transform = useComputedValue(() => {
-    const { x, y } = polar2Canvas(
-      { theta, radius: progress.current * R },
-      { x: 0, y: 0 }
-    );
-    const scale = mix(progress.current, 0.3, 1);
-    return [{ translateX: x }, { translateY: y }, { scale }];
-  }, [progress, R]);
-
-  return (
-    <Circle
-      c={center}
-      r={R}
-      color={index % 2 ? c1 : c2}
-      origin={center}
-      transform={transform}
-    />
-  );
-};
+import React from "react";
+import { StyleSheet, Text, useWindowDimensions } from "react-native";
+import { useDerivedValue } from "react-native-reanimated";
 
 export const Breathe = () => {
-  const { width, height } = useWindowDimensions();
-  const center = useMemo(
-    () => vec(width / 2, height / 2 - 64),
-    [height, width]
-  );
-
-  const progress = useLoop({
-    duration: 3000,
-    easing: Easing.inOut(Easing.ease),
+  // state
+  const { width } = useWindowDimensions();
+  // render
+  const path = useDerivedValue(() => {
+    const p = Skia.Path.Make();
+    p.addArc(Skia.XYWHRect(0, 0, 150, 150), 90, 45);
+    return p;
   });
 
-  const transform = useComputedValue(
-    () => [{ rotate: mix(progress.current, -Math.PI, 0) }],
-    [progress]
-  );
-
   return (
-    <Canvas style={styles.container} debug>
-      <Fill color="rgb(36,43,56)" />
-      <Group origin={center} transform={transform} blendMode="screen">
-        <BlurMask style="solid" blur={40} />
-        {new Array(6).fill(0).map((_, index) => {
-          return <Ring key={index} index={index} progress={progress} />;
-        })}
-      </Group>
+    <Canvas style={{ width: "100%", height: "100%" }}>
+      <Path path={path} color="red" />
     </Canvas>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  canvas: {
     flex: 1,
+  },
+  leftText: {
+    position: "absolute",
+    left: 10,
+    top: 100,
+    color: "black",
+  },
+  rightText: {
+    position: "absolute",
+    right: 10,
+    top: 100,
+    color: "black",
   },
 });
