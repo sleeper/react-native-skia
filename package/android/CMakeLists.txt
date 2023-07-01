@@ -46,6 +46,7 @@ add_library(
         "${PROJECT_SOURCE_DIR}/cpp/jni/JniPlatformContext.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/RNSkOpenGLCanvasProvider.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/SkiaOpenGLRenderer.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/OpenGLSkiaContext.cpp"
 
         "${PROJECT_SOURCE_DIR}/cpp/jsi/JsiHostObject.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/jsi/JsiValue.cpp"
